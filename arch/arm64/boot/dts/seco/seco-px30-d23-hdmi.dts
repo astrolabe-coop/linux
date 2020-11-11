@@ -1,0 +1,140 @@
+// SPDX-License-Identifier: (GPL-2.0+ OR MIT)
+/*
+ * Copyright (c) 2018 Fuzhou Rockchip Electronics Co., Ltd
+ */
+
+/dts-v1/;
+#include "seco-px30-d23.dtsi"
+
+/ {
+	model = "Seco D23 PX30 - HDMI video output";
+	compatible = "rockchip,linux", "rockchip,rk3326";
+
+	chosen {
+		bootargs = "earlycon=uart8250,mmio32,0xff160000 swiotlb=1 console=ttyFIQ2 rw root=/dev/mmcblk0p8 rootwait";
+	};
+};
+
+&lvds_in_vopb {
+	status = "disabled";
+};
+
+&lvds_in_vopl {
+	status = "disabled";
+};
+
+&rgb {
+	status = "okay";
+
+	ports {
+		port@1 {
+			reg = <1>;
+
+			rgb_out_vif: endpoint {
+				remote-endpoint = <&vif_in_rgb>;
+			};
+		};
+	};
+};
+
+&rgb_in_vopb {
+	status = "okay";
+};
+
+&rgb_in_vopl {
+	status = "okay";
+};
+
+&route_rgb {
+	connect = <&vopl_out_rgb>;
+	status = "okay";
+};
+
+&video_phy {
+	status = "okay";
+};
+
+&route_lvds {
+	status = "disabled";
+};
+
+&i2c1 {
+	status = "okay";
+	clock-frequency = <400000>;
+	/*rtc pcf8563 i2c0-->i2c1*/
+
+    tda998x@70 {
+        compatible = "nxp,tda998x";
+        reg = <0x70>;
+		clock: cru {
+			compatible = "rockchip,rk618-cru";
+			clocks = <&cru SCLK_I2S1_OUT>, <&cru DCLK_VOPL>;
+			clock-names = "clkin", "lcdc0_dclkp";
+			assigned-clocks = <&clock SCALER_PLLIN_CLK>,
+					  <&clock VIF_PLLIN_CLK>,
+					  <&clock SCALER_CLK>,
+					  <&clock VIF0_PRE_CLK>,
+					  <&clock CODEC_CLK>,
+					  <&clock DITHER_CLK>;
+			assigned-clock-parents = <&cru SCLK_I2S1_OUT>,
+						 <&clock LCDC0_CLK>,
+						 <&clock SCALER_PLL_CLK>,
+						 <&clock VIF_PLL_CLK>,
+						 <&cru SCLK_I2S1_OUT>,
+						 <&clock VIF0_CLK>;
+			#clock-cells = <1>;
+			status = "okay";
+		};
+
+		hdmi {
+			compatible = "rockchip,rk618-hdmi";
+			clocks = <&clock HDMI_CLK>;
+			clock-names = "hdmi";
+			assigned-clocks = <&clock HDMI_CLK>;
+			assigned-clock-parents = <&clock VIF0_CLK>;
+			status = "disabled";
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+
+					hdmi_in_vif: endpoint {
+						remote-endpoint = <&vif_out_hdmi>;
+					};
+				};
+			};
+		};
+
+		vif {
+			compatible = "rockchip,rk618-vif";
+			clocks = <&clock VIF0_CLK>, <&clock VIF0_PRE_CLK>;
+			clock-names = "vif", "vif_pre";
+			status = "disabled";
+
+			ports {
+				#address-cells = <1>;
+				#size-cells = <0>;
+
+				port@0 {
+					reg = <0>;
+
+					vif_in_rgb: endpoint {
+						remote-endpoint = <&rgb_out_vif>;
+					};
+				};
+
+				port@1 {
+					reg = <1>;
+
+					vif_out_hdmi: endpoint {
+						remote-endpoint = <&hdmi_in_vif>;
+					};
+				};
+			};
+		};
+    };
+};
+
