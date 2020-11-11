@@ -1,0 +1,17 @@
+
+/dts-v1/;
+
+#include "dt-bindings/pwm/pwm.h"
+#include <dt-bindings/input/input.h>
+#include <dt-bindings/display/drm_mipi_dsi.h>
+
+#include "seco-rk3399.dtsi"
+#include "seco-rk3399-opp.dtsi"
+#include "seco-rk3399-vop-clk-set.dtsi"
+
+
+/ {
+	model      = "Rockchip RK3399 SECO Board (C31)";
+	compatible = "rockchip,seco-rk3399-c31", "rockchip,rk3399";
+
+};

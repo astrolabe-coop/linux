@@ -60,7 +60,11 @@ if [ "${ARCH}" == "arm" ]; then
 	KERNEL_ZIMAGE_ARG="--kernel ${objtree}/arch/arm/boot/zImage"
 	ZIMAGE=zImage
 else
-	DTB_PATH=${objtree}/arch/arm64/boot/dts/rockchip/${DTB}
+	if [[ ${DTB} == "seco-"* ]]; then
+		DTB_PATH=${objtree}/arch/arm64/boot/dts/seco/${DTB}
+	else
+		DTB_PATH=${objtree}/arch/arm64/boot/dts/rockchip/${DTB}
+	fi
 	KERNEL_IMAGE_ARG="--kernel ${objtree}/arch/arm64/boot/Image"
 	KERNEL_ZIMAGE_ARG="--kernel ${objtree}/arch/arm64/boot/Image.lz4"
 	ZIMAGE=Image.lz4

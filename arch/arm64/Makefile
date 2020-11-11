@@ -176,5 +176,8 @@ LOGO_KERNEL := $(notdir $(wildcard $(srctree)/logo_kernel.bmp))
 %.img: rockchip/%.dtb kernel.img $(LOGO) $(LOGO_KERNEL)
 	$(Q)$(srctree)/scripts/mkimg --dtb $*.dtb
 
+seco-%.img: seco/seco-%.dtb kernel.img $(LOGO) $(LOGO_KERNEL)
+	$(Q)$(srctree)/scripts/mkimg --dtb seco-$*.dtb
+
 CLEAN_DIRS += out
 CLEAN_FILES += boot.img kernel.img resource.img zboot.img
