@@ -154,6 +154,15 @@
 		enable-active-high;
 		vin-supply              = <&vcc5v0_sys>;
 	};
+
+
+	vcc_tlv320: vcc-tlv320-regulator {
+		compatible              = "regulator-fixed";
+		regulator-name          = "tlv320aic32x4_supply";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		regulator-always-on;
+	};
 };
 
 
@@ -454,6 +463,48 @@
 
 /*  __________________________________________________________________________
  * |                                                                          |
+ * |                                 AUDIO                                    |
+ * |__________________________________________________________________________|
+ */
+&i2s0 {
+	rockchip,i2s-broken-burst-len;
+	pinctrl-names                  = "default";
+	pinctrl-0                      = <&i2s0_2ch_bus &i2s0_2ch_mclk>;
+	rockchip,playback-channels     = <2>;
+	rockchip,capture-channels      = <2>;
+	#sound-dai-cells               = <0>;
+	//rockchip,clk-trcm              = <1>; 	// only tx_lrck/bclk is used
+
+	status                         = "okay";
+};
+
+
+/ {
+	headphones-sound {
+		status                        = "okay";
+		compatible                    = "simple-audio-card";
+		simple-audio-card,format      = "i2s";
+		simple-audio-card,name        = "rk-tlvcodec-sound";
+		simple-audio-card,mclk-fs     = <256>;
+		simple-audio-card,hp-det-gpio = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
+
+		simple-audio-card,cpu {
+			bitclock-master;
+			frame-master;
+			sound-dai         = <&i2s0>;
+		};
+		simple-audio-card,codec {
+			sound-dai         = <&tlvcodec>;
+		};
+	};
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
  * |                                   I2C                                    |
  * |__________________________________________________________________________|
  */
@@ -684,6 +735,28 @@
 };
 
 
+&i2c1 {
+	clock-frequency   = <100000>;
+	status            = "okay";
+
+	tlvcodec: tlv320aic32x4@18 { 
+		compatible       = "ti,tlv320aic32x4"; 
+		reg              = <0x18>;
+		#sound-dai-cells = <0>;
+		pinctrl-names    = "default";
+		pinctrl-0        = <&codec_audio>;
+		clocks           = <&cru SCLK_I2S_8CH_OUT>;
+		clock-names      = "mclk";
+		ldoin-supply     = <&vcc_tlv320>;
+		iov-supply       = <&vcc_tlv320>;
+		dov-supply       = <&vcc_tlv320>;
+		aov-supply       = <&vcc_tlv320>;
+		reset-gpios      = <&gpio3 6 GPIO_ACTIVE_LOW>;
+		hp-det-gpio      = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>; 
+	};
+};
+
+
 &i2c4 {
 	clock-frequency   = <100000>;
 	status            = "okay";
@@ -805,6 +878,30 @@
 				<3 1 RK_FUNC_1 &pcfg_pull_none_13ma>,
 				/* mac_txd2 */
 				<3 0 RK_FUNC_1 &pcfg_pull_none_13ma>;
+		};
+	};
+
+
+	audio_i2s {
+		i2s0_2ch_bus: i2s0_2ch_bus {
+				rockchip,pins =
+					<3 RK_PD0 RK_FUNC_1 &pcfg_pull_none>,
+					<3 RK_PD2 RK_FUNC_1 &pcfg_pull_none>,
+					<3 RK_PD3 RK_FUNC_1 &pcfg_pull_none>,		
+					<3 RK_PD7 RK_FUNC_1 &pcfg_pull_none>;
+		};
+
+
+		i2s0_2ch_mclk: i2s0_2ch_mclk {
+				rockchip,pins =
+					<4 RK_PA0 RK_FUNC_1 &pcfg_pull_none>;
+		};
+
+
+		codec_audio: codec-audio {
+			rockchip,pins =
+				<3 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>,
+				<2 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 };
