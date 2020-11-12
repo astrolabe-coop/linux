@@ -60,7 +60,18 @@
 		regulator-max-microvolt = <3300000>;
 		enable-active-high;
 		regulator-always-on;
-		vin-supply              = <&vcc3v3_s3>;
+		vin-supply              = <&vcc3v3_sys>;
+	};
+
+
+	vdd_eth: vdd-eth {
+		compatible              = "regulator-fixed";
+		regulator-name          = "vdd_eth";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+		regulator-always-on;
+		vin-supply              = <&vcc3v3_sys>;
 	};
     
 
@@ -387,6 +398,32 @@
 
 /*  __________________________________________________________________________
  * |                                                                          |
+ * |                                ETHERNET                                  |
+ * |__________________________________________________________________________|
+ */
+&gmac {
+	phy-supply             = <&vdd_eth>;
+	phy-mode               = "rgmii";
+	clock_in_out           = "output";
+	snps,reset-gpio        = <&gpio3 RK_PB7 GPIO_ACTIVE_LOW>;
+	snps,reset-active-low;
+	snps,reset-delays-us   = <0 10000 50000>;
+	assigned-clocks        = <&cru SCLK_RMII_SRC>;
+    assigned-clock-parents = <&cru SCLK_MAC>;
+    assigned-clock-rates   = <125000000>;
+	pinctrl-names          = "default";
+	pinctrl-0              = <&rgmii_pins>;
+	tx_delay               = <0x28>;
+	rx_delay               = <0x11>;
+	status                 = "okay";
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
  * |                                   I2C                                    |
  * |__________________________________________________________________________|
  */
@@ -705,6 +742,41 @@
 		};
 	};
 
+	gmac {
+		rgmii_pins: rgmii-pins {
+			rockchip,pins =
+				/* mac_txclk */
+				<3 17 RK_FUNC_1 &pcfg_pull_none_13ma>,
+				/* reset */
+				<3 15 RK_FUNC_1 &pcfg_output_high>,
+				/* mac_rxclk */
+				<3 14 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_mdio */
+				<3 13 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_txen */
+				<3 12 RK_FUNC_1 &pcfg_pull_none_13ma>,
+				/* mac_rxdv */
+				<3 9 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_mdc */
+				<3 8 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_rxd1 */
+				<3 7 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_rxd0 */
+				<3 6 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_txd1 */
+				<3 5 RK_FUNC_1 &pcfg_pull_none_13ma>,
+				/* mac_txd0 */
+				<3 4 RK_FUNC_1 &pcfg_pull_none_13ma>,
+				/* mac_rxd3 */
+				<3 3 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_rxd2 */
+				<3 2 RK_FUNC_1 &pcfg_pull_none>,
+				/* mac_txd3 */
+				<3 1 RK_FUNC_1 &pcfg_pull_none_13ma>,
+				/* mac_txd2 */
+				<3 0 RK_FUNC_1 &pcfg_pull_none_13ma>;
+		};
+	};
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
