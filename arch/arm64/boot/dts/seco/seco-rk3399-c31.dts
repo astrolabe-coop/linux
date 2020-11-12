@@ -51,6 +51,17 @@
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 	};
+
+
+    vcc3v3_run: vcc3v3-run {
+		compatible              = "regulator-fixed";
+		regulator-name          = "vcc3v3_run";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+		regulator-always-on;
+		vin-supply              = <&vcc3v3_s3>;
+	};
     
 
 	vcc5v0_sys: vcc5v-sys {
@@ -76,6 +87,87 @@
 };
 
 
+/*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                    CPU                                   |
+ * |__________________________________________________________________________|
+ */
+&cpu_l0 {
+	cpu-supply = <&vdd_cpu_l>;
+};
+
+
+&cpu_l1 {
+	cpu-supply = <&vdd_cpu_l>;
+};
+
+
+&cpu_l2 {
+	cpu-supply = <&vdd_cpu_l>;
+};
+
+
+&cpu_l3 {
+	cpu-supply = <&vdd_cpu_l>;
+};
+
+
+&cpu_b0 {
+	cpu-supply = <&vdd_cpu_b>;
+};
+
+
+&cpu_b1 {
+	cpu-supply = <&vdd_cpu_b>;
+};
+
+
+&dmc {
+	status             = "okay";
+	center-supply      = <&vdd_center>;
+	upthreshold        = <40>;
+	downdifferential   = <20>;
+
+	system-status-freq = <
+		/*system status         freq(KHz)*/
+		SYS_STATUS_NORMAL       800000
+		SYS_STATUS_REBOOT       528000
+		SYS_STATUS_SUSPEND      200000
+		SYS_STATUS_VIDEO_1080P  200000
+		SYS_STATUS_VIDEO_4K     600000
+		SYS_STATUS_VIDEO_4K_10B 800000
+		SYS_STATUS_PERFORMANCE  800000
+		SYS_STATUS_BOOST        400000
+		SYS_STATUS_DUALVIEW     600000
+		SYS_STATUS_ISP          600000
+	>;
+	vop-bw-dmc-freq = <
+	/* min_bw(MB/s) max_bw(MB/s) freq(KHz) */
+		0       762      200000
+		763     1893     400000
+		1894    3012     528000
+		3013    99999    800000
+	>;
+
+	auto-min-freq = <200000>;
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+ /*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                    GPU                                   |
+ * |__________________________________________________________________________|
+ */
+&gpu {
+	status      = "okay";
+	mali-supply = <&vdd_gpu>;
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
 
 
 /*  __________________________________________________________________________
