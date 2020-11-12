@@ -326,4 +326,33 @@ config BT_WILINK
 	  Say Y here to compile support for Texas Instrument's WiLink7 driver
 	  into the kernel or say M to compile it as module (btwilink).
 
+
+config BT_MRVL_SDIO
+	tristate "Marvell BT-over-SDIO driver"
+	depends on BT_MRVL && MMC
+	select FW_LOADER
+	select WANT_DEV_COREDUMP
+	help
+	  The driver for Marvell Bluetooth chipsets with SDIO interface.
+
+	  This driver is required if you want to use Marvell Bluetooth
+	  devices with SDIO interface. Currently SD8688/SD8787/SD8797/SD8887/SD8897/SD8997
+	  chipsets are supported.
+
+	  Say Y here to compile support for Marvell BT-over-SDIO driver
+	  into the kernel or say M to compile it as module.
+
+config SD8997_BT
+	tristate "88W8997 Azurewave BT-over-SDIO driver"
+	help
+	  The driver for Azurwave Bluetooth chipsets with SDIO interface.
+
+	  This driver is required if you want to use Azurwave Bluetooth
+	  devices with SDIO interface. Currently Azurwave SD8997
+	  chipsets are supported.
+
+	  Say Y here to compile support for Azurwave BT-over-SDIO driver
+	  into the kernel or say M to compile it as module.
+
 endmenu
+source drivers/bluetooth/sd8997_bt/Kconfig
