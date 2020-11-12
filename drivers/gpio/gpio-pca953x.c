@@ -447,7 +447,7 @@ static void pca953x_setup_gpio(struct pca953x_chip *chip, int gpios)
 	gc->set = pca953x_gpio_set_value;
 	gc->get_direction = pca953x_gpio_get_direction;
 	gc->set_multiple = pca953x_gpio_set_multiple;
-	gc->can_sleep = true;
+	gc->can_sleep = false;
 
 	gc->base = chip->gpio_start;
 	gc->ngpio = gpios;
