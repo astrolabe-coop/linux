@@ -121,6 +121,18 @@
 		enable-active-high;
 		vin-supply              = <&vcc5v0_sys>;
 	};
+
+
+    vcc5v0_host_usb3: vcc5v0-host-usb3-regulator {
+		compatible              = "regulator-fixed";
+		gpio                    = <&gpio1 RK_PA1 GPIO_ACTIVE_HIGH>;
+		regulator-name          = "vcc5v0_host_usb3";
+        regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		enable-active-high;
+		vin-supply              = <&vcc5v0_sys>;
+	};
 };
 
 
@@ -255,6 +267,7 @@
  */
  &u2phy0 {
 	status  = "okay";
+    extcon  = <&fusb0>;
 	dr_mode = "host";
 	
 	u2phy0_host: host-port {
@@ -296,6 +309,55 @@
 	status = "okay";
 };
  /*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                    USB 3                                 |
+ * |__________________________________________________________________________|
+ */
+&usbdrd3_0 {
+	status = "okay";
+	extcon = <&fusb0>;
+};
+
+
+&usbdrd_dwc3_0 {
+	status = "okay";
+};
+
+
+&usbdrd3_1 {
+	status = "okay";
+};
+
+&usbdrd_dwc3_1 {
+	status = "okay";
+	dr_mode = "host";
+};
+
+
+&tcphy0 {
+	extcon = <&fusb0>;
+	status = "okay";
+};
+
+
+&tcphy1 {
+	status = "okay";
+};
+
+&tsadc {
+	/* tshut mode 0:CRU 1:GPIO */
+	rockchip,hw-tshut-mode = <1>;
+	/* tshut polarity 0:LOW 1:HIGH */
+	rockchip,hw-tshut-polarity = <1>;
+	rockchip,hw-tshut-temp = <110000>;
+	status = "okay";
+};
+/*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
 
@@ -555,6 +617,22 @@
 };
 
 
+&i2c4 {
+	clock-frequency   = <100000>;
+	status            = "okay";
+
+	fusb0: fusb30x@22 {
+		compatible    = "fairchild,fusb302";
+		reg           = <0x22>;
+		pinctrl-names = "default";
+		pinctrl-0     = <&fusb0_int>;
+		vbus-5v-gpios = <&gpio0 RK_PA4 GPIO_ACTIVE_HIGH>;
+		int-n-gpios   = <&gpio4 RK_PC5 GPIO_ACTIVE_HIGH>;
+		status        = "disabled";
+	};
+};
+
+
 &i2c5 {
 	clock-frequency      = <100000>;
 	status               = "okay";
@@ -615,6 +693,15 @@
 		host_hub_enable: host-vbus-drv {
 			rockchip,pins =
 				<1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+
+    fusb30x {
+		fusb0_int: fusb0-int {
+			rockchip,pins =
+				<0 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>,
+				<4 RK_PC5 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
