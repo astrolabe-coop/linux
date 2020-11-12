@@ -84,6 +84,43 @@
 		regulator-max-microvolt = <3300000>;
 		enable-active-high;
 	};
+
+
+    usb2_hub_host: usb2-hub-host {
+		compatible              = "regulator-fixed";
+		gpio                    = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
+		pinctrl-names           = "default";
+		pinctrl-0               = <&host_hub_enable>;
+		regulator-name          = "usb2_hub_host";
+        regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-down;
+		regulator-always-on;
+	};
+
+
+	vcc5v0_host_usb1_2: vcc5v0-host-usb1-2-regulator {
+		compatible              = "regulator-fixed";
+		gpio                    = <&pca6416 0 GPIO_ACTIVE_HIGH>;
+		regulator-name          = "vcc5v0_host_usb1_2";
+        regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		enable-active-high;
+		vin-supply              = <&vcc5v0_sys>;
+	};
+
+
+	vcc5v0_host_usb3_4: vcc5v0-host-usb3-4-regulator {
+		compatible              = "regulator-fixed";
+		gpio                    = <&pca6416 1 GPIO_ACTIVE_HIGH>;
+		regulator-name          = "vcc5v0_host_usb3_4";
+        regulator-min-microvolt = <5000000>;
+		regulator-max-microvolt = <5000000>;
+		regulator-always-on;
+		enable-active-high;
+		vin-supply              = <&vcc5v0_sys>;
+	};
 };
 
 
@@ -207,6 +244,58 @@
 	status             = "okay";
 };
 /*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+ /*  __________________________________________________________________________
+ * |                                                                          |
+ * |                                    USB 2                                 |
+ * |__________________________________________________________________________|
+ */
+ &u2phy0 {
+	status  = "okay";
+	dr_mode = "host";
+	
+	u2phy0_host: host-port {
+		phy-supply = <&usb2_hub_host &vcc5v0_host_usb1_2 &vcc5v0_host_usb3_4>;
+		status     = "okay";
+	};
+};
+
+
+&u2phy1 {
+	status = "okay";
+
+	u2phy1_otg: otg-port {
+		status = "okay";
+	};
+
+	u2phy1_host: host-port {
+		status = "okay";
+	};
+};
+
+
+&usb_host0_ehci {
+	status = "okay";
+};
+
+
+&usb_host0_ohci {
+	status = "okay";
+};
+
+
+&usb_host1_ehci {
+	status = "okay";
+};
+
+
+&usb_host1_ohci {
+	status = "okay";
+};
+ /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
 
@@ -518,6 +607,14 @@
 			rockchip,pins =
 				<2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,	// IRQ
 				<4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;	// RST
+		};
+	};
+
+
+    usb2 {
+		host_hub_enable: host-vbus-drv {
+			rockchip,pins =
+				<1 RK_PA2 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
