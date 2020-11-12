@@ -664,6 +664,18 @@
 	// };
 };
 
+
+/* --------------------------------- HDMI --------------------------------- */
+&hdmi {
+	pinctrl-names = "default";
+	pinctrl-0 = <&hdmi_i2c_xfer>, <&hdmi_cec>;
+	#address-cells = <1>;
+	#size-cells = <0>;
+	#sound-dai-cells = <0>;
+	status = "okay";
+};
+
+
 /* --------------------------------- EDP --------------------------------- */
 / {
 	backlight: lcd-backlight {
@@ -672,7 +684,7 @@
 		enable-gpios             = <&pca6416 10 GPIO_ACTIVE_HIGH>;
 		power-supply             = <&vcc12v0_edp_vbkl_sw>;
 		default-brightness-level = <255>;
-		status                   = "okay";
+		status                   = "disable";
 
 		brightness-levels = <
 			  0   1   2   3   4   5   6   7
@@ -714,7 +726,7 @@
 		compatible       = "simple-panel";
 		backlight        = <&backlight>;
 		power-supply     = <&vcc3v3_edp_vlcd_sw>;
-		status           = "okay";
+		status           = "disabled";
 
 		display-timings {
 			native-mode = <&timing0>;
@@ -746,7 +758,7 @@
 
 
 &edp {
-	status     = "okay";
+	status     = "disabled";
 	force-hpd;
 
 	ports {
@@ -785,7 +797,38 @@
 };
 
 
+&i2s2 {
+	#sound-dai-cells = <0>;
+	status           = "okay";
+};
+
+
 / {
+	hdmi_sound: hdmi-sound {
+		status = "okay";
+	};
+
+	dw_hdmi_audio: dw-hdmi-audio {
+		status = "okay";
+		compatible = "rockchip,dw-hdmi-audio";
+		#sound-dai-cells = <0>;
+	};
+
+
+	hdmi_sound: hdmi-sound {
+		status = "okay";
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,name = "rockchip,hdmi";
+
+		simple-audio-card,cpu {
+			sound-dai = <&i2s2>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&hdmi>;
+		};
+	};
 	headphones-sound {
 		status                        = "okay";
 		compatible                    = "simple-audio-card";
