@@ -129,6 +129,41 @@
 	clock-frequency         = <400000>;
 	status                  = "okay";
 
+
+    vdd_cpu_b: syr827@63 {
+		compatible = "richtek,rt5759";
+		reg        = <0x63>;
+		vin-supply = <&vcc5v0_sys>;
+		regulator-name          = "vdd_cpu_b";
+		regulator-min-microvolt = <600000>;
+		regulator-max-microvolt = <1500000>;
+		regulator-ramp-delay    = <1000>;
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-initial-state = <3>;
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
+	};
+
+
+	vdd_gpu: syr827@62 {
+		compatible = "richtek,rt5759";
+		reg        = <0x62>;
+		vin-supply = <&vcc5v0_sys>;
+		regulator-name          = "vdd_gpu";
+		regulator-min-microvolt = <600000>;
+		regulator-max-microvolt = <1500000>;
+		regulator-ramp-delay    = <1000>;
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-initial-state = <3>;
+		regulator-state-mem {
+			regulator-off-in-suspend;
+		};
+	};
+
+
 	rk808: pmic@1b {
 		compatible       = "rockchip,rk808";
 		reg              = <0x1b>;
