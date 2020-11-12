@@ -9,3 +9,4 @@ obj-$(CONFIG_DRM_CHIPONE_ICN6211) += icn6211.o
 
 obj-y += analogix/
 obj-y += synopsys/
+obj-y += sn65dsi84/
