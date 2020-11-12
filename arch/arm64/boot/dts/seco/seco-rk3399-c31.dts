@@ -667,10 +667,12 @@
 /* --------------------------------- EDP --------------------------------- */
 / {
 	backlight: lcd-backlight {
-		compatible   = "pwm-backlight";
-		pwms         = <&pwm2 0 250000 0>;
-		enable-gpios = <&pca6416 10 GPIO_ACTIVE_HIGH>;
-		power-supply = <&vcc12v0_edp_vbkl_sw>;
+		compatible               = "pwm-backlight";
+		pwms                     = <&pwm2 0 250000 0>;
+		enable-gpios             = <&pca6416 10 GPIO_ACTIVE_HIGH>;
+		power-supply             = <&vcc12v0_edp_vbkl_sw>;
+		default-brightness-level = <255>;
+		status                   = "okay";
 
 		brightness-levels = <
 			  0   1   2   3   4   5   6   7
@@ -705,8 +707,6 @@
 			232 233 234 235 236 237 238 239
 			240 241 242 243 244 245 246 247
 			248 249 250 251 252 253 254 255>;
-		default-brightness-level = <255>;
-		status                   = "okay";
 	};
 
 
@@ -716,7 +716,7 @@
 		power-supply     = <&vcc3v3_edp_vlcd_sw>;
 		status           = "okay";
 
-		isplay-timings {
+		display-timings {
 			native-mode = <&timing0>;
 
 			timing0: timing0 {
@@ -746,9 +746,8 @@
 
 
 &edp {
-	status        = "okay";
-	pinctrl-names = "default";
-	pinctrl-0     = <&edp_hpd>;
+	status     = "okay";
+	force-hpd;
 
 	ports {
 		edp_out: port@1 {
