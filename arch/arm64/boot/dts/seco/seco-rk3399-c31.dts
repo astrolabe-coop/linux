@@ -375,6 +375,7 @@
 
 
 &usbdrd_dwc3_0 {
+	dr_mode = "otg";
 	status = "okay";
 };
 
@@ -417,9 +418,10 @@
  * |                                  PCIe                                    |
  * |__________________________________________________________________________|
  */
- &pcie_phy {
+&pcie_phy {
 	status = "okay";
 };
+
 
 &pcie0 {
 	ep-gpios          = <&pca6416 13 GPIO_ACTIVE_HIGH>;
@@ -768,7 +770,8 @@
 		pinctrl-0     = <&fusb0_int>;
 		vbus-5v-gpios = <&gpio0 RK_PA4 GPIO_ACTIVE_HIGH>;
 		int-n-gpios   = <&gpio4 RK_PC5 GPIO_ACTIVE_HIGH>;
-		status        = "disabled";
+		status        = "okay";
+		fusb302,role  = "ROLE_MODE_DFP";  // (ROLE_MODE_DRP/ROLE_MODE_DFP/ROLE_MODE_UFP)
 	};
 };
 
