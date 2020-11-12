@@ -79,6 +79,7 @@ struct rt57xx_device_info {
 	unsigned int                 slew_mask;
 	unsigned int                 slew_shift;
 	/* Voltage range and step(linear) */
+	unsigned int                 fb_ratio;
 	unsigned int                 vsel_min;
 	unsigned int                 vsel_step;
 	unsigned int                 n_voltages;
@@ -205,10 +206,63 @@ static int rt57xx_set_ramp( struct regulator_dev *rdev, int ramp ) {
 }
 
 
+static inline unsigned int rt57xx_step2microvolt( struct regulator_dev *rdev, unsigned sel ) {
+	struct rt57xx_device_info *di = rdev_get_drvdata(rdev);
+	return ( sel * di->vsel_step ) + di->vsel_min;
+}
+
+
+static inline unsigned rt57xx_microvolt2step( struct regulator_dev *rdev, unsigned int volt ) {
+	struct rt57xx_device_info *di = rdev_get_drvdata(rdev);
+	return ( volt - di->vsel_min ) / di->vsel_step;
+}
+
+static int rt57xx_set_voltage_sel_regmap( struct regulator_dev *rdev, unsigned sel ) {
+	struct rt57xx_device_info *di = rdev_get_drvdata(rdev);
+	int ret;
+	unsigned int volt;
+
+	volt = rt57xx_step2microvolt( rdev, sel );
+	volt /= di->fb_ratio;
+	volt *= 1000;
+	sel = rt57xx_microvolt2step( rdev, volt );
+	sel <<= ffs(rdev->desc->vsel_mask) - 1;
+	ret = regmap_update_bits( rdev->regmap, rdev->desc->vsel_reg,
+				  rdev->desc->vsel_mask, sel );
+	if ( ret )
+		return ret;
+
+	if ( rdev->desc->apply_bit )
+		ret = regmap_update_bits( rdev->regmap, rdev->desc->apply_reg,
+					 rdev->desc->apply_bit,
+					 rdev->desc->apply_bit );
+	return ret;
+}
+
+
+static int rt57xx_get_voltage_sel_regmap( struct regulator_dev *rdev ) {
+	struct rt57xx_device_info *di = rdev_get_drvdata(rdev);
+	unsigned int val;
+	int ret;
+	unsigned int volt;
+
+	ret = regmap_read( rdev->regmap, rdev->desc->vsel_reg, &val );
+	if ( ret != 0 )
+		return ret;
+
+	val &= rdev->desc->vsel_mask;
+	volt = rt57xx_step2microvolt( rdev, val );
+	volt /= 1000;
+	volt *= di->fb_ratio;
+	val = rt57xx_microvolt2step( rdev, volt );
+	val >>= ffs(rdev->desc->vsel_mask) - 1;
+	return val;
+}
+
 
 static struct regulator_ops rt57xx_regulator_ops = {
-	.set_voltage_sel = regulator_set_voltage_sel_regmap,
-	.get_voltage_sel = regulator_get_voltage_sel_regmap,
+	.set_voltage_sel = rt57xx_set_voltage_sel_regmap,
+	.get_voltage_sel = rt57xx_get_voltage_sel_regmap,
 	.set_voltage_time_sel = regulator_set_voltage_time_sel,
 	.map_voltage = regulator_map_voltage_linear,
 	.list_voltage = regulator_list_voltage_linear,
@@ -279,12 +333,77 @@ static const struct regmap_config rt57xx_regmap_config = {
 	.reg_bits     = 8,
 	.val_bits     = 8,
 	.max_register = REG_DCDC_SET,
-	.cache_type   = REGCACHE_RBTREE,
+	.cache_type   = REGCACHE_NONE, //REGCACHE_RBTREE,
 };
+
+
+
+
+
+static ssize_t sys_manufacturer_show (struct device *dev, struct device_attribute *attr,
+	   								char *buf)
+{
+	struct rt57xx_device_info *di = (struct rt57xx_device_info *)dev_get_drvdata( dev );
+	unsigned int val = 0;
+
+	if ( !di ) {
+		return sprintf( buf, "Data error\n" );
+	}
+
+	regmap_read( di->regmap, REG_MANUFACTURER_ID, &val );
+	return sprintf( buf, "%02X\n", (uint8_t)val );
+}
+
+
+static ssize_t sys_dump_show (struct device *dev, struct device_attribute *attr,
+	   								char *buf)
+{
+	struct rt57xx_device_info *di = (struct rt57xx_device_info *)dev_get_drvdata( dev );
+	unsigned int val = 0;
+	unsigned char msg[500];
+	unsigned char tmp[50];
+	int i;
+
+	if ( !di ) {
+		return sprintf( buf, "Data error\n" );
+	}
+
+	sprintf (msg, "\nReg\tvalue");
+	for ( i = 0 ; i <= 5 ; i++ ) {
+		regmap_read( di->regmap, i, &val );
+		sprintf( tmp, "\n%02d\t0x%02X", i, val );
+		strcat( msg, tmp );
+	}
+
+	regmap_read( di->regmap, REG_MANUFACTURER_ID, &val );
+	sprintf (tmp, "\n%02d\t0x%04X", i, val);
+
+	return sprintf (buf, "%s\n", msg);
+}
+
+
+static DEVICE_ATTR( manufacturer, S_IRUGO, sys_manufacturer_show, NULL );
+static DEVICE_ATTR( dump_regs, S_IRUGO, sys_dump_show, NULL );
+
+
+
+static struct attribute *sysfs_attrs[] = {
+	&dev_attr_manufacturer.attr,
+	&dev_attr_dump_regs.attr,
+	NULL,
+};
+
+
+static struct attribute_group sysfs_attr_group = {
+	.attrs = sysfs_attrs,
+};
+
+
 
 
 static struct rt57xx_platform_data *rt57xx_parse_dt(struct device *dev,
 					      struct device_node *np,
+						  struct rt57xx_device_info *di,
 					      const struct regulator_desc *desc)
 {
 	struct rt57xx_platform_data *pdata;
@@ -295,6 +414,8 @@ static struct rt57xx_platform_data *rt57xx_parse_dt(struct device *dev,
 
     pdata->regulator = of_get_regulator_init_data(dev, np, desc);
 	pdata->regulator->constraints.initial_state = PM_SUSPEND_MEM;
+
+	of_property_read_u32( np, "rate-offset-fb", &di->fb_ratio );
 
     return pdata;
 }
@@ -327,7 +448,7 @@ static int rt57xx_regulator_probe( struct i2c_client *client,
 
     di->desc.of_map_mode = rt35xx_map_mode;
 
-    pdata = rt57xx_parse_dt( &client->dev, np, &di->desc );
+    pdata = rt57xx_parse_dt( &client->dev, np, di, &di->desc );
 
 	if ( !pdata || !pdata->regulator ) {
 		dev_err( &client->dev, "Platform data not found!\n" );
@@ -361,8 +482,7 @@ static int rt57xx_regulator_probe( struct i2c_client *client,
 	}
 
 	di->dev = &client->dev;
-	i2c_set_clientdata( client, di );
-
+	
 	/* Get chip ID */
 	ret = regmap_read( di->regmap, REG_MANUFACTURER_ID, &val );
 	if (ret < 0) {
@@ -370,7 +490,7 @@ static int rt57xx_regulator_probe( struct i2c_client *client,
 		return ret;
 	}
 	di->chip_id = val & 0xFF;
-	dev_info(&client->dev, "RT57xx with ID=%d Detected!\n",	di->chip_id );
+	dev_info(&client->dev, "RT57xx with ID=%02X Detected!\n",	di->chip_id );
 
 	/* Device init */
 	ret = rt57xx_device_setup(di, pdata);
@@ -387,8 +507,15 @@ static int rt57xx_regulator_probe( struct i2c_client *client,
 	config.of_node     = np;
 
     ret = rt57xx_regulator_register( di, &config );
-    if ( ret < 0 )
+    if ( ret < 0 ) {
 		dev_err( &client->dev, "Failed to register regulator!\n" ); 
+		return ret;
+	}
+
+	ret = sysfs_create_group( &client->dev.kobj, &sysfs_attr_group );
+
+	i2c_set_clientdata( client, di );
+	dev_set_drvdata( &client->dev, di );
 
     return 0;
 }

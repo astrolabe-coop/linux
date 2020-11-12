@@ -822,14 +822,15 @@
 	status                  = "okay";
 
 
-    vdd_cpu_b: syr827@63 {
-		compatible = "richtek,rt5759";
-		reg        = <0x63>;
-		vin-supply = <&vcc5v0_sys>;
+    vdd_cpu_b: rt5759@63 {
+		compatible              = "richtek,rt5759";
+		reg                     = <0x63>;
+		vin-supply              = <&vcc5v0_sys>;
 		regulator-name          = "vdd_cpu_b";
 		regulator-min-microvolt = <600000>;
 		regulator-max-microvolt = <1500000>;
 		regulator-ramp-delay    = <1000>;
+		rate-offset-fb          = <1234>;  // ( 1 + Rup/Rdown) * 1000 ; voltage growing due to the fb net 
 		regulator-always-on;
 		regulator-boot-on;
 		regulator-initial-state = <3>;
@@ -839,14 +840,15 @@
 	};
 
 
-	vdd_gpu: syr827@62 {
-		compatible = "richtek,rt5759";
-		reg        = <0x62>;
-		vin-supply = <&vcc5v0_sys>;
+	vdd_gpu: rt5759@62 {
+		compatible              = "richtek,rt5759";
+		reg                     = <0x62>;
+		vin-supply              = <&vcc5v0_sys>;
 		regulator-name          = "vdd_gpu";
 		regulator-min-microvolt = <600000>;
 		regulator-max-microvolt = <1500000>;
 		regulator-ramp-delay    = <1000>;
+		rate-offset-fb          = <1200>;  // ( 1 + Rup/Rdown) * 1000 ; voltage growing due to the fb net 
 		regulator-always-on;
 		regulator-boot-on;
 		regulator-initial-state = <3>;
