@@ -840,5 +840,11 @@ config REGULATOR_XZ3216
 	help
 	  Support the voltage and current regulators of the XZ321X series of DCDC devices.
 
+config REGULATOR_RT57XX
+	tristate "Richtek 57xx voltage regulator"
+	depends on I2C
+	help
+		Support the voltage and current regulators of the RT57XX series of Synchronous Step-Down Converter
+
 endif
 
