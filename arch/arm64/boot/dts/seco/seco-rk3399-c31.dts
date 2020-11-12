@@ -662,6 +662,33 @@
 	// 		connect = <&vopl_out_edp>;
 	// 	};
 	// };
+
+
+
+	// route_dp: route-dp {
+	// 	status           = "okay";
+	// 	logo,uboot       = "logo.bmp";
+	// 	logo,kernel      = "logo_kernel.bmp";
+	// 	logo,mode        = "center";
+	// 	charge_logo,mode = "center";
+	// 	connect          = <&vopb_out_dp>;
+	// };
+};
+
+
+/* --------------------------------- DP over typeC --------------------------------- */
+&cdn_dp {
+	status = "disabled";
+	phys   = <&tcphy0_dp>;
+	extcon = <&fusb0>;
+};
+
+&dp_in_vopb {
+	status = "disabled";
+};
+
+&dp_in_vopl {
+	status = "disabled";
 };
 
 
@@ -829,6 +856,8 @@
 			sound-dai = <&hdmi>;
 		};
 	};
+
+
 	headphones-sound {
 		status                        = "okay";
 		compatible                    = "simple-audio-card";
