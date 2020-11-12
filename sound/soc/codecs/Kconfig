@@ -130,6 +130,8 @@ config SND_SOC_ALL_CODECS
 	select SND_SOC_TLV320AIC26 if SPI_MASTER
 	select SND_SOC_TLV320AIC31XX if I2C
 	select SND_SOC_TLV320AIC32X4 if I2C
+	select SND_SOC_TLV320AIC32X4_I2C if I2C
+	select SND_SOC_TLV320AIC32X4_SPI if SPI_MASTER
 	select SND_SOC_TLV320AIC3X if I2C
 	select SND_SOC_TPA6130A2 if I2C
 	select SND_SOC_TLV320DAC33 if I2C
@@ -774,7 +776,18 @@ config SND_SOC_TLV320AIC31XX
 	select REGMAP_I2C
 
 config SND_SOC_TLV320AIC32X4
+	tristate "Texas Instruments TLV320AIC32x4 audio CODECs - dav"
 	tristate
+
+config SND_SOC_TLV320AIC32X4_I2C
+	tristate "Texas Instruments TLV320AIC32x4 audio CODECs - I2C"
+	depends on I2C
+	select SND_SOC_TLV320AIC32X4
+
+config SND_SOC_TLV320AIC32X4_SPI
+	tristate "Texas Instruments TLV320AIC32x4 audio CODECs - SPI"
+	depends on SPI_MASTER
+	select SND_SOC_TLV320AIC32X4
 
 config SND_SOC_TLV320AIC3X
 	tristate "Texas Instruments TLV320AIC3x CODECs"
