@@ -129,6 +129,19 @@
 	};
 
 
+	sdio_wifi_pwr: sdio-wifi-pwr {
+		compatible              = "regulator-fixed";
+		gpio                    = <&gpio2 RK_PD3 GPIO_ACTIVE_HIGH>;
+		pinctrl-names           = "default";
+		pinctrl-0               = <&sdio0_pwr_h>;
+		regulator-name          = "sdio_wifi_pwr";
+		regulator-min-microvolt = <3300000>;
+		regulator-max-microvolt = <3300000>;
+		enable-active-high;
+        startup-delay-us        = <1000>;
+	};
+
+
     usb2_hub_host: usb2-hub-host {
 		compatible              = "regulator-fixed";
 		gpio                    = <&gpio1 RK_PA2 GPIO_ACTIVE_HIGH>;
@@ -210,6 +223,16 @@
 		regulator-max-microvolt = <12000000>;
 		enable-active-high;
 		vin-supply              = <&vcc12v0_sys>;
+	};
+
+
+	sdio_pwrseq: sdio-pwrseq {
+		compatible    = "mmc-pwrseq-simple";
+		clocks        = <&rk808 1>;
+		clock-names   = "ext_clock";
+		pinctrl-names = "default";
+		pinctrl-0     = <&wifi_enable_h>;
+		reset-gpios   = <&gpio3 RK_PD1 GPIO_ACTIVE_HIGH>;
 	};
 };
 
@@ -391,6 +414,42 @@
 	cap-sd-highspeed;
 	disable-wp;
 	status             = "okay";
+};
+
+
+/*  WIFI  */
+&sdio0 {
+	pinctrl-names            = "default";
+	pinctrl-0                = <&sdio0_bus4 &sdio0_cmd &sdio0_clk>;
+	bus-width                = <4>;
+	vmmc-supply              = <&sdio_wifi_pwr>;
+	mmc-pwrseq               = <&sdio_pwrseq>;
+	num-slots                = <1>;
+	supports-sdio;
+	disable-wp;
+	cap-sd-highspeed;
+	cap-sdio-irq;
+	keep-power-in-suspend;
+	non-removable;
+	sd-uhs-sdr104;
+	status                   = "okay";
+
+	sd8xxx-wlan {
+			status            = "okay";
+			drv_mode          = <0x1>;
+			cfg80211_wext     = <0xf>;
+			sta_name          = "wlan";
+			wfd_name          = "p2p";
+			max_vir_bss       = <1>;
+			cal_data_cfg      = "mrvl/cal_data.conf";
+			fw_name           = "mrvl/sd8997_combo_v4.bin";
+			reg_alpha2        = "US";
+			p2p_enh           = <1>;
+			auto_ds           = <0>;
+			inact_tmo         = <3000>;
+			gtk_rekey_offload = <1>;
+			cfg80211_drcs     = <0>;
+		};
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -1069,6 +1128,14 @@
 	};
 
 
+	sdio0_pwr_h {
+		sdio0_pwr_h: sdio0_pwr_h {
+			rockchip,pins =
+				<2 RK_PD3 RK_FUNC_GPIO &pcfg_pull_up>;
+		};
+	};
+
+
     gpio_expander {
 		pca6416_gpios: pca6416_gpios {
 			rockchip,pins =
@@ -1127,6 +1194,14 @@
 				<3 1 RK_FUNC_1 &pcfg_pull_none_13ma>,
 				/* mac_txd2 */
 				<3 0 RK_FUNC_1 &pcfg_pull_none_13ma>;
+		};
+	};
+
+
+	sdio-pwrseq {
+		wifi_enable_h: wifi-enable-h {
+			rockchip,pins =
+				<3 RK_PD1 RK_FUNC_GPIO &pcfg_pull_none>;
 		};
 	};
 
