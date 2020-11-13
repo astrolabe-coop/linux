@@ -195,6 +195,10 @@
 	assigned-clock-rates = <1188000000>;
 };
 
+&lvds {
+	status = "disabled";
+};
+
 &rgb {
 	status = "disabled";
 };
@@ -242,7 +246,6 @@
 &spi0 {
         status = "okay";
         max-freq = <48000000>;
-        spi-slave;
 	    spi_dev@0 {
           status = "okay";
           compatible = "rockchip,spidev";
@@ -254,8 +257,7 @@
 };
 
 &spi1 {
-        status = "okay";
-        max-freq = <50000000>;
+        status = "disabled";
 };
 
 &i2c0 {
@@ -519,26 +521,20 @@
 	clock-frequency = <400000>;
 	/*rtc pcf8563 i2c0-->i2c1*/
 
-    tda998x@70 {
-        compatible = "nxp,tda998x";
-        reg = <0x70>;
-			status = "disabled";
-		};
-
 	rtc@51 {
-                compatible = "nxp,pcf8563";
-                reg = <0x51>;
-        };
+        compatible = "nxp,pcf8563";
+        reg = <0x51>;
+    };
 
-	i2c_gpio_expander@3e{
+	i2c_gpio_expander@3e {
 		#gpio-cells = <2>;
 		#interrupt-cells = <2>;
 		compatible = "semtech,sx1509q";
 		pinctrl-names = "default";
                 pinctrl-0 = <&sx1509_int>;
 		reg = <0x3e>;
-		interrupt-parent = <&gpio3>;/*gpio3_c2*/
-		interrupts = <23 0>;
+		interrupt-parent = <&gpio0>; /* gpio0_a3 */
+		interrupts = <4 0>;
 		gpio-controller;
 		interrupt-controller;
 		/*oscio_is_gpo;
@@ -745,7 +741,7 @@
 	i2c_gpio {
 		sx1509_int: sx1509_int{
 			rockchip,pins =
-			 <3 RK_PC2 RK_FUNC_GPIO &pcfg_pull_up>;
+			 <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
@@ -768,7 +764,6 @@
                 <0 RK_PA0 RK_FUNC_GPIO &pcfg_output_high>, /* 1P8V_RUN_EN   - GPIO_0  */
                 <0 RK_PA1 RK_FUNC_GPIO &pcfg_output_high>, /* M2_SDIO_WAKE# - GPIO_1  */
                 <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>, /* VCC_AMP_EN    - GPIO_2  */
-                <0 RK_PA3 RK_FUNC_GPIO &pcfg_output_high>, /* IO_EXP_INT#   - GPIO_3  */
 
                 <0 RK_PA5 RK_FUNC_GPIO &pcfg_output_high>, /* TOUCH_INT#    - GPIO_5  */
 
@@ -779,9 +774,7 @@
                 <0 RK_PC4 RK_FUNC_1    &pcfg_output_high>, /* CLKOUT_32K  */
 
                 <1 RK_PB0 RK_FUNC_GPIO &pcfg_output_high>, /* IO_EXPB_RST#  - GPIO_40 */
-                <1 RK_PB3 RK_FUNC_GPIO &pcfg_output_high>, /* IO_EXPA_RST#  - GPIO_43 */
-
-                <2 RK_PB3 RK_FUNC_GPIO &pcfg_output_high>; /* ENET_RST#     - GPIO_75 */
+                <1 RK_PB3 RK_FUNC_GPIO &pcfg_output_high>; /* IO_EXPA_RST#  - GPIO_43 */
 		};
 	};
 };
