@@ -63,6 +63,8 @@ EXPORT_TRACEPOINT_SYMBOL_GPL(mmc_blk_rw_end);
  */
 #define MMC_BKOPS_MAX_TIMEOUT	(4 * 60 * 1000) /* max time to wait in ms */
 
+static int __mmc_max_reserved_idx = -1;
+
 /*
  * Enabling software CRCs on the data blocks can be a significant (30%)
  * performance cost, and for other reasons may not always be desired.
@@ -2913,6 +2915,39 @@ void mmc_init_context_info(struct mmc_host *host)
 	init_waitqueue_head(&host->context_info.wait);
 }
 
+/*
+ * mmc_first_nonreserved_index() - get the first index that
+ * is not reserved
+ */
+int mmc_first_nonreserved_index(void)
+{
+	return __mmc_max_reserved_idx + 1;
+}
+EXPORT_SYMBOL(mmc_first_nonreserved_index);
+
+/*
+ * mmc_get_reserved_index() - get the index reserved for this host
+ * Return: The index reserved for this host or negative error value
+ * 	   if no index is reserved for this host
+ */
+int mmc_get_reserved_index(struct mmc_host *host)
+{
+	return of_alias_get_id(host->parent->of_node, "mmc");
+}
+EXPORT_SYMBOL(mmc_get_reserved_index);
+
+static void mmc_of_reserve_idx(void)
+{
+	int max;
+
+	max = of_alias_max_index("mmc");
+	if (max < 0)
+		return;
+
+	__mmc_max_reserved_idx = max;
+	pr_debug("MMC: reserving %d slots for of aliases\n",
+			__mmc_max_reserved_idx + 1);
+}
 #ifdef CONFIG_MMC_EMBEDDED_SDIO
 void mmc_set_embedded_sdio_data(struct mmc_host *host,
 				struct sdio_cis *cis,
@@ -2932,6 +2967,8 @@ EXPORT_SYMBOL(mmc_set_embedded_sdio_data);
 static int __init mmc_init(void)
 {
 	int ret;
+
+	mmc_of_reserve_idx();
 
 	ret = mmc_register_bus();
 	if (ret)

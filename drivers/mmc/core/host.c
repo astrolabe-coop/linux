@@ -32,14 +32,14 @@
 #include "slot-gpio.h"
 #include "pwrseq.h"
 
-static DEFINE_IDR(mmc_host_idr);
+static DEFINE_IDA(mmc_host_ida);
 static DEFINE_SPINLOCK(mmc_host_lock);
 
 static void mmc_host_classdev_release(struct device *dev)
 {
 	struct mmc_host *host = cls_dev_to_mmc_host(dev);
 	spin_lock(&mmc_host_lock);
-	idr_remove(&mmc_host_idr, host->index);
+	ida_simple_remove(&mmc_host_ida, host->index);
 	spin_unlock(&mmc_host_lock);
 	kfree(host);
 }
@@ -331,6 +331,7 @@ EXPORT_SYMBOL(mmc_of_parse);
 struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
 {
 	int err;
+	int alias_id;
 	struct mmc_host *host;
 
 	host = kzalloc(sizeof(struct mmc_host) + extra, GFP_KERNEL);
@@ -339,18 +340,22 @@ struct mmc_host *mmc_alloc_host(int extra, struct device *dev)
 
 	/* scanning will be enabled when we're ready */
 	host->rescan_disable = 1;
-	idr_preload(GFP_KERNEL);
-	spin_lock(&mmc_host_lock);
-	err = idr_alloc(&mmc_host_idr, host, 0, 0, GFP_NOWAIT);
-	if (err >= 0)
-		host->index = err;
-	spin_unlock(&mmc_host_lock);
-	idr_preload_end();
+	host->parent = dev;
+
+	alias_id = mmc_get_reserved_index(host);
+	if (alias_id >= 0)
+		err = ida_simple_get(&mmc_host_ida, alias_id,
+					alias_id + 1, GFP_KERNEL);
+	else
+		err = ida_simple_get(&mmc_host_ida,
+					mmc_first_nonreserved_index(),
+					0, GFP_KERNEL);
 	if (err < 0) {
 		kfree(host);
 		return NULL;
 	}
 
+	host->index = err;
 	dev_set_name(&host->class_dev, "mmc%d", host->index);
 
 	host->parent = dev;
