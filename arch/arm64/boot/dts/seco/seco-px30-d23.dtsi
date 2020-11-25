@@ -123,6 +123,19 @@
 		regulator-min-microvolt = <5000000>;
 		regulator-max-microvolt = <5000000>;
 	};
+
+	sdio_pwrseq: sdio-pwrseq {
+		compatible = "mmc-pwrseq-simple";
+
+		/*
+		 * On the module itself this is one of these (depending
+		 * on the actual card populated):
+		 * - SDIO_RESET_L_WL_REG_ON
+		 * - PDN (power down when low)
+		 */
+		reset-gpios = <&gpio_expanderA_u32 10 GPIO_ACTIVE_LOW>; 
+	};
+
 };
 
 &bus_apll {
@@ -634,7 +647,14 @@
 };
 
 &sdio {
-	status = "disabled";
+	bus-width = <4>;
+	sd-uhs-sdr25;
+	supports-sdio;
+	ignore-pm-notify;
+	keep-power-in-suspend;
+	non-removable;
+	mmc-pwrseq = <&sdio_pwrseq>;
+	status = "okay";
 };
 
 &tsadc {
@@ -742,15 +762,23 @@
         };
 
 	sdmmc_pwr  {
-                sdmmc_pwr: sdmmc_pwr {
-                        rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>;
-                };
+        sdmmc_pwr: sdmmc_pwr {
+               rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>;
         };
+	};
 
-	i2c_gpio {
-		sx1509_int: sx1509_int{
+	i2c_pcal6416a_u32 {
+		pinctrl_pcal6416a_u32: pinctrl_pcal6416a_u32 {
 			rockchip,pins =
-			 <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>;
+             <1 RK_PB3 RK_FUNC_GPIO &pcfg_output_low>; /* IO_EXPA_RST#  - GPIO_43 */
+		};
+	};
+
+	i2c_pcal6416b_u33 {
+		pinctrl_pcal6416b_u33: pinctrl_pcal6416b_u33 {
+			rockchip,pins =
+             <1 RK_PB0 RK_FUNC_GPIO &pcfg_output_low>, /* IO_EXPB_RST#  - GPIO_40 */
+             <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>; /* IO_EXPB_INT#  - GPIO_3 */
 		};
 	};
 
@@ -780,10 +808,7 @@
                 <0 RK_PB7 RK_FUNC_GPIO &pcfg_output_high>, /* AMP_SD#       - GPIO_15 */
 
                 <0 RK_PC1 RK_FUNC_GPIO &pcfg_output_high>, /* M2_UART_WAKE# - GPIO_17 */
-                <0 RK_PC4 RK_FUNC_1    &pcfg_output_high>, /* CLKOUT_32K  */
-
-                <1 RK_PB0 RK_FUNC_GPIO &pcfg_output_high>, /* IO_EXPB_RST#  - GPIO_40 */
-                <1 RK_PB3 RK_FUNC_GPIO &pcfg_output_high>; /* IO_EXPA_RST#  - GPIO_43 */
+                <0 RK_PC4 RK_FUNC_1    &pcfg_output_high>; /* CLKOUT_32K  */
 		};
 	};
 };
