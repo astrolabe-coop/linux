@@ -238,7 +238,7 @@
 	clock_in_out = "input";
     phy-mode = "rmii";
     pinctrl-names = "default";
-    pinctrl-0 = <&rmii_pins &mac_refclk_12ma &eth_phy_pwr>;
+    pinctrl-0 = <&rmii_pins &mac_refclk_input &eth_phy_pwr>;
 	snps,reset-gpio = <&gpio2 11 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 100000 100000>;
@@ -760,6 +760,12 @@
                                 <2 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
                 };
         };
+
+    gmac {
+        mac_refclk_input: mac-refclk-in {
+                rockchip,pins = <2 RK_PB2 RK_FUNC_2 &pcfg_input>;
+            };
+	};
 
 	sdmmc_pwr  {
         sdmmc_pwr: sdmmc_pwr {
