@@ -109,9 +109,6 @@
 	vcc_phy: vcc-phy-regulator {
 		compatible = "regulator-fixed";
 		regulator-name = "vcc_phy";
-//		gpio = <&gpio2 11 GPIO_ACTIVE_HIGH>;
-//		pinctrl-name="default";
-//		pinctrl-0=<&eth_phy_pwr>;
 		regulator-always-on;
 		regulator-boot-on;
 		regulator-min-microvolt = <3300000>;
@@ -246,13 +243,14 @@
 &spi0 {
         status = "okay";
         max-freq = <48000000>;
+		pinctrl-0 = <&spi0_clk &spi0_csn &spi0_miso &spi0_mosi>;
+		pinctrl-1 = <&spi0_clk_hs &spi0_csn &spi0_miso_hs &spi0_mosi_hs>;
 	    spi_dev@0 {
           status = "okay";
           compatible = "rockchip,spidev";
           reg = <0>;
           spi-max-frequency = <48000000>;
 	      spi-lsb-first;
-	      spi-gpio-cs= <&gpio1 RK_PB6 GPIO_ACTIVE_LOW>;
        };
 };
 
