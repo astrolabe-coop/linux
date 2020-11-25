@@ -524,23 +524,34 @@
         reg = <0x51>;
     };
 
-	i2c_gpio_expander@3e {
-		#gpio-cells = <2>;
-		#interrupt-cells = <2>;
-		compatible = "semtech,sx1509q";
+	gpio_expanderA_u32: pcal6416@20 {
+		compatible = "nxp,pcal6416";
+		reg = <0x20>;
 		pinctrl-names = "default";
-                pinctrl-0 = <&sx1509_int>;
-		reg = <0x3e>;
-		interrupt-parent = <&gpio0>; /* gpio0_a3 */
-		interrupts = <4 0>;
+		pinctrl-0 = <&pinctrl_pcal6416a_u32>;
+		gpio-base = <256>;
 		gpio-controller;
+		#gpio-cells = <2>;
+		reset-gpios = <&gpio1 RK_PB3 GPIO_ACTIVE_HIGH>;
+//		interrupt-parent = <&gpio4>;
+//		interrupts = <16 0x2>;
 		interrupt-controller;
-		/*oscio_is_gpo;
-		reset_during_probe;*/
-		pullup_ena = <0xffff>;
-		pulldn_ena = <0x0>;
-		open_drain_ena = <0x0>;
-		polarity = <0x0>;
+		#interrupt-cells = <2>;
+	};
+	
+	gpio_expanderB_u33: pcal6416@21 {
+		compatible = "nxp,pcal6416";
+		reg = <0x21>;
+		pinctrl-names = "default";
+		pinctrl-0 = <&pinctrl_pcal6416b_u33>;
+		gpio-base = <272>;
+		gpio-controller;
+		#gpio-cells = <2>;
+		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+		interrupt-parent = <&gpio0>;
+		interrupts = <RK_PA3 0x2>;
+		interrupt-controller;
+		#interrupt-cells = <2>;
 	};
 };
 
