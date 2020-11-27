@@ -26,6 +26,11 @@
 
 #include <asm/unaligned.h>
 
+#define PCA6416_IN		0x00
+#define PCA6416_OUT		0x01
+#define PCA6416_INVRT		0x02
+#define PCA6416_CFG		0x03
+
 #define PCA953X_INPUT		0x00
 #define PCA953X_OUTPUT		0x01
 #define PCA953X_INVERT		0x02
@@ -66,6 +71,7 @@
 #define PCA_LATCH_INT (PCA_PCAL | PCA_INT)
 #define PCA953X_TYPE		0x1000
 #define PCA957X_TYPE		0x2000
+#define PCA6416_TYPE		0x4000
 #define PCA_TYPE_MASK		0xF000
 
 #define PCA_CHIP_TYPE(x)	((x) & PCA_TYPE_MASK)
@@ -88,6 +94,7 @@ static const struct i2c_device_id pca953x_id[] = {
 
 	{ "pcal6524", 24 | PCA953X_TYPE | PCA_INT | PCA_PCAL, },
 	{ "pcal9555a", 16 | PCA953X_TYPE | PCA_INT | PCA_PCAL, },
+	{ "pcal6416", 16 | PCA6416_TYPE | PCA_INT | PCA_PCAL, },
 
 	{ "max7310", 8  | PCA953X_TYPE, },
 	{ "max7312", 16 | PCA953X_TYPE | PCA_INT, },
@@ -120,6 +127,12 @@ struct pca953x_reg_config {
 	int direction;
 	int output;
 	int input;
+};
+
+static const struct pca953x_reg_config pca6416_regs = {
+	.direction = PCA6416_CFG,
+	.output = PCA6416_OUT,
+	.input = PCA6416_IN,
 };
 
 static const struct pca953x_reg_config pca953x_regs = {
@@ -211,6 +224,17 @@ static int pca953x_write_regs_16(struct pca953x_chip *chip, int reg, u8 *val)
 }
 
 static int pca957x_write_regs_16(struct pca953x_chip *chip, int reg, u8 *val)
+{
+	int ret;
+
+	ret = i2c_smbus_write_byte_data(chip->client, reg << 1, val[0]);
+	if (ret < 0)
+		return ret;
+
+	return i2c_smbus_write_byte_data(chip->client, (reg << 1) + 1, val[1]);
+}
+
+static int pca6416_write_regs_16(struct pca953x_chip *chip, int reg, u8 *val)
 {
 	int ret;
 
@@ -677,7 +701,7 @@ static int pca953x_irq_setup(struct pca953x_chip *chip,
 					client->irq,
 					   NULL,
 					   pca953x_irq_handler,
-					   IRQF_TRIGGER_LOW | IRQF_ONESHOT |
+					   IRQF_TRIGGER_FALLING | IRQF_TRIGGER_RISING | IRQF_ONESHOT |
 						   IRQF_SHARED,
 					   dev_name(&client->dev), chip);
 		if (ret) {
@@ -780,12 +804,43 @@ out:
 	return ret;
 }
 
+static int device_pca6416_init(struct pca953x_chip *chip, u32 invert)
+{
+	int ret;
+	u8 val[MAX_BANK];
+
+	chip->regs = &pca6416_regs;
+
+	ret = pca953x_read_regs(chip, chip->regs->output, chip->reg_output);
+	if (ret)
+		goto out;
+	ret = pca953x_read_regs(chip, chip->regs->direction,
+				chip->reg_direction);
+	if (ret)
+		goto out;
+
+	/* set platform specific polarity inversion */
+	if (invert)
+		memset(val, 0xFF, NBANK(chip));
+	else
+		memset(val, 0, NBANK(chip));
+	ret = pca953x_write_regs(chip, PCA6416_INVRT, val);
+	if (ret)
+		goto out;
+
+	return 0;
+out:
+	return ret;
+}
+
 static const struct of_device_id pca953x_dt_ids[];
 
 static int pca953x_probe(struct i2c_client *client,
 				   const struct i2c_device_id *i2c_id)
 {
 	struct pca953x_platform_data *pdata;
+	struct device *dev = &client->dev;
+	struct device_node *np = dev->of_node;
 	struct pca953x_chip *chip;
 	int irq_base = 0;
 	int ret;
@@ -804,10 +859,16 @@ static int pca953x_probe(struct i2c_client *client,
 		invert = pdata->invert;
 		chip->names = pdata->names;
 	} else {
+		int gpio_base;
 		struct gpio_desc *reset_gpio;
 
 		chip->gpio_start = -1;
 		irq_base = 0;
+
+		if (of_property_read_u32(np, "gpio-base", &gpio_base) == 0)
+			chip->gpio_start = gpio_base;
+
+		printk(KERN_INFO "GPIO from i2c, PCAL6416 GPIO Expander will start from %d [ BANK = gpio%d ] \n", gpio_base, (gpio_base / 32) + 1);
 
 		/*
 		 * See if we need to de-assert a reset pin.
@@ -817,7 +878,7 @@ static int pca953x_probe(struct i2c_client *client,
 		 * must use _DSD method with corresponding property.
 		 */
 		reset_gpio = devm_gpiod_get_optional(&client->dev, "reset",
-						     GPIOD_OUT_LOW);
+						     GPIOD_OUT_HIGH);
 		if (IS_ERR(reset_gpio))
 			return PTR_ERR(reset_gpio);
 	}
@@ -894,6 +955,8 @@ static int pca953x_probe(struct i2c_client *client,
 	} else {
 		if (PCA_CHIP_TYPE(chip->driver_data) == PCA953X_TYPE)
 			chip->write_regs = pca953x_write_regs_16;
+		else if (PCA_CHIP_TYPE(chip->driver_data) == PCA6416_TYPE)
+			chip->write_regs = pca6416_write_regs_16;
 		else
 			chip->write_regs = pca957x_write_regs_16;
 		chip->read_regs = pca953x_read_regs_16;
@@ -901,6 +964,8 @@ static int pca953x_probe(struct i2c_client *client,
 
 	if (PCA_CHIP_TYPE(chip->driver_data) == PCA953X_TYPE)
 		ret = device_pca953x_init(chip, invert);
+	else if (PCA_CHIP_TYPE(chip->driver_data) == PCA6416_TYPE)
+		ret = device_pca6416_init(chip, 0);
 	else
 		ret = device_pca957x_init(chip, invert);
 	if (ret)
@@ -953,6 +1018,7 @@ static int pca953x_remove(struct i2c_client *client)
 /* convenience to stop overlong match-table lines */
 #define OF_953X(__nrgpio, __int) (void *)(__nrgpio | PCA953X_TYPE | __int)
 #define OF_957X(__nrgpio, __int) (void *)(__nrgpio | PCA957X_TYPE | __int)
+#define OF_6416(__nrgpio, __int) (void *)(__nrgpio | PCA6416_TYPE | __int)
 
 static const struct of_device_id pca953x_dt_ids[] = {
 	{ .compatible = "nxp,pca9505", .data = OF_953X(40, PCA_INT), },
@@ -969,6 +1035,7 @@ static const struct of_device_id pca953x_dt_ids[] = {
 	{ .compatible = "nxp,pca9574", .data = OF_957X( 8, PCA_INT), },
 	{ .compatible = "nxp,pca9575", .data = OF_957X(16, PCA_INT), },
 	{ .compatible = "nxp,pca9698", .data = OF_953X(40, 0), },
+	{ .compatible = "nxp,pcal6416", .data = OF_6416(16, PCA_INT), },
 
 	{ .compatible = "nxp,pcal6524", .data = OF_953X(24, PCA_LATCH_INT), },
 	{ .compatible = "nxp,pcal9555a", .data = OF_953X(16, PCA_LATCH_INT), },
