@@ -654,6 +654,32 @@
 
 /*  __________________________________________________________________________
  * |                                                                          |
+ * |                                   GSM                                    |
+ * |__________________________________________________________________________|
+ */
+/ {
+	gsm_power: gsm_power {
+		compatible    = "seco,gsm-pwr-mng";
+		pinctrl-names = "default";
+		pinctrl-0     = <&gsm_modem_pwr>;
+		rst-gpios     = <&gpio1 RK_PC7 GPIO_ACTIVE_LOW>;
+		rst-active-low; 
+		usben-gpios   = <&gpio2 RK_PA4 GPIO_ACTIVE_LOW>;
+		usben-active-low; 
+		//vgsm-gpios    = <&pca6416 2 GPIO_ACTIVE_HIGH>;
+		//vgsm-active-low;
+		pwrkey-gpios  = <&gpio2 RK_PA2 GPIO_ACTIVE_HIGH>;
+		pwr-active-low;
+		status        = "okay";
+	};
+};
+/*  __________________________________________________________________________
+ * |__________________________________________________________________________|
+ */
+
+
+/*  __________________________________________________________________________
+ * |                                                                          |
  * |                                   PWM                                    |
  * |__________________________________________________________________________|
  */
@@ -1634,6 +1660,16 @@
 		dsi_bridge_on: edp-bridge-on {
 			rockchip,pins = 
 				<3 RK_PD4 RK_FUNC_GPIO &pcfg_output_high>;
+		};
+	};
+
+
+	gsm_modem {
+		gsm_modem_pwr: gsm-modem-pwr {
+			rockchip,pins = 
+				<2 RK_PA2 RK_FUNC_GPIO &pcfg_pull_none>,   //pwe
+				<1 RK_PC7 RK_FUNC_GPIO &pcfg_pull_none>,   //reset
+				<2 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;   //usben
 		};
 	};
 
