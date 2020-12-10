@@ -376,14 +376,35 @@
  */
 
 
- /*  __________________________________________________________________________
+ /* __________________________________________________________________________
  * |                                                                          |
- * |                                    GPU                                   |
+ * |                              HW ACCELERATION                             |
  * |__________________________________________________________________________|
  */
 &gpu {
 	status      = "okay";
 	mali-supply = <&vdd_gpu>;
+};
+
+
+&gpu_power_model {
+	// for DDK r14.
+	voltage       = <900>;
+	frequency     = <500>;
+	static-power  = <300>;
+	dynamic-power = <396>;
+};
+
+
+&rga {
+	compatible    = "rockchip,rga2";
+	dev_mode      = <1>;
+	reg           = <0x0 0xff680000 0x0 0x1000>;
+	interrupts    = <GIC_SPI 55 IRQ_TYPE_LEVEL_HIGH 0>;
+	clocks        = <&cru ACLK_RGA>, <&cru HCLK_RGA>, <&cru SCLK_RGA_CORE>;
+	clock-names   = "aclk_rga", "hclk_rga", "clk_rga";
+	power-domains = <&power RK3399_PD_RGA>;
+	status        = "okay";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
