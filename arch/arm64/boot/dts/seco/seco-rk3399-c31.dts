@@ -665,6 +665,11 @@
 &pwm2 {
 	status = "okay";
 };
+
+
+&pwm3 {
+	status = "okay";
+};
  /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
@@ -855,8 +860,12 @@
 / {
 	lvds_backlight: lvds-backlight {
 		compatible               = "pwm-backlight";
-		pwms                     = <&pwm1 0 250000 0>;
-		enable-gpios             = <&pca6416 3 GPIO_ACTIVE_HIGH>;
+		/* for external backlight controller */
+	///	pwms                     = <&pwm1 0 250000 0>;
+	//	enable-gpios             = <&pca6416 3 GPIO_ACTIVE_HIGH>;
+		/* for on board backlight controller */
+		pwms                     = <&pwm3 0 250000 0>;
+		/* --------------------------------- */
 		power-supply             = <&vcc_lvds_vbkl_sw>;
 		default-brightness-level = <255>;
 		status                   = "okay";
