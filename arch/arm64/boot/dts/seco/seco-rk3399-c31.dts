@@ -1359,6 +1359,14 @@
 		status        = "okay";
 		fusb302,role  = "ROLE_MODE_DFP";  // (ROLE_MODE_DRP/ROLE_MODE_DFP/ROLE_MODE_UFP)
 	};
+
+
+	at24@57 {
+		compatible = "at24,24aa025";
+		pagesize   = <256>;
+		reg        = <0x57>;
+		status     = "okay";
+	};
 };
 
 
