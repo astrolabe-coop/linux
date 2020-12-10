@@ -1501,6 +1501,15 @@
 &spi2 {
 	status = "okay";
 
+	rtc: pcf2123@00 {
+		compatible          = "nxp,rtc-pcf2123";
+		reg                 = <0>;
+		spi-max-frequency   = <1000000>;
+		//spi-cs-high;
+		status              = "okay";
+	};
+
+
 	can2: can2@0 {
 		compatible          = "microchip,mcp2517fd";
 		reg                 = <0>;
