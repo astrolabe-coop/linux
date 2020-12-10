@@ -269,6 +269,14 @@
 		#clock-cells = <0>;
 		clock-frequency = <27000000>;
 	};
+
+
+	/* 20MHz reference crystal */
+	ref20M: ref20M {
+        compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <20000000>;
+	};
 };
 
 
@@ -1404,6 +1412,46 @@
  */
 
 
+&spi1 {
+	status = "okay";
+
+	can1: can1@0 {
+        compatible          = "microchip,mcp2517fd";
+		reg                 = <0>;
+		clocks              = <&ref20M>;
+		pinctrl-names       = "default";
+		pinctrl-0           = <&can1_int>;
+		interrupt-parent    = <&gpio1>;
+		interrupts          = <RK_PA3 0x2>;
+		vdd-supply          = <&vcc_3v0>;
+		xceiver-supply      = <&vcc5v0_sys>;
+		spi-min-frequency   = <1000000>;
+		spi-max-frequency   = <1000000>;
+		status              = "disabled";
+    };
+};
+
+
+&spi2 {
+	status = "okay";
+
+	can2: can2@0 {
+		compatible          = "microchip,mcp2517fd";
+		reg                 = <0>;
+		clocks              = <&ref20M>;
+		pinctrl-names       = "default";
+		pinctrl-0           = <&can2_int>;
+		interrupt-parent    = <&gpio1>;
+		interrupts          = <RK_PA4 0x2>;
+		vdd-supply          = <&vcc_3v0>;
+		xceiver-supply      = <&vcc5v0_sys>;
+		spi-max-frequency   = <10000000>;
+		status              = "disabled";
+    };
+};
+
+
+
 /*  __________________________________________________________________________
  * |                                                                          |
  * |                              PIN MUX/CONTROL                             |
@@ -1549,6 +1597,21 @@
 		};
 	};
 
+
+	can1_control {
+		can1_int: can1-int {
+			rockchip,pins = 
+				<1 RK_PA3 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
+
+
+	can2_control {
+		can2_int: can2-int {
+			rockchip,pins = 
+				<1 RK_PA4 RK_FUNC_GPIO &pcfg_pull_none>;
+		};
+	};
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
