@@ -61,6 +61,9 @@
 	#size-cells = <2>;
 
 	aliases {
+		mmc0 = &sdhci;
+		mmc1 = &sdmmc;
+		mmc3 = &sdio0;
 		dsi0 = &dsi;
 		dsi1 = &dsi1;
 		ethernet0 = &gmac;
