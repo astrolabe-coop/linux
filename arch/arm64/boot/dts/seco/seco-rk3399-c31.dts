@@ -382,6 +382,11 @@
  * |                              HW ACCELERATION                             |
  * |__________________________________________________________________________|
  */
+
+&vpu {
+	status = "okay";
+};
+
 &gpu {
 	status = "okay";
 	mali-supply = <&vdd_gpu>;
