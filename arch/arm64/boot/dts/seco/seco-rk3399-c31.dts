@@ -1023,7 +1023,7 @@
 
 
 &dsi {
-	status = "okay";
+	status = "disabled";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -1374,7 +1374,7 @@
 
 		pd-gpios        = <&gpio3 RK_PD4 GPIO_ACTIVE_HIGH>;
 
-		status          = "okay";
+		status          = "disabled";
 		//bkl-gpios = <&pca6416_20 5 GPIO_ACTIVE_HIGH>;
 		//lcd-gpios = <&pca6416_20 9 GPIO_ACTIVE_HIGH>;
 
