@@ -159,8 +159,13 @@ static int dp83867_of_init(struct phy_device *phydev)
 	struct device_node *of_node = dev->of_node;
 	int ret;
 
-	if (!of_node)
-		return -ENODEV;
+	if (!of_node)	{
+		printk("%s: no dts node, using default delay\n",__func__);
+		dp83867->rx_id_delay = DP83867_RGMIIDCTL_1_NS ;
+		dp83867->tx_id_delay =  DP83867_RGMIIDCTL_1_NS ;
+		dp83867->fifo_depth =  DP83867_PHYCR_FIFO_DEPTH_8_B_NIB;
+		return 0;
+	}
 
 	dp83867->io_impedance = -EINVAL;
 
@@ -340,7 +345,7 @@ static int dp83867_phy_reset(struct phy_device *phydev)
 	err = phy_write(phydev, DP83867_CTRL, DP83867_SW_RESET);
 	if (err < 0)
 		return err;
-
+	
 	return dp83867_config_init(phydev);
 }
 

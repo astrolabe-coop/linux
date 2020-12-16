@@ -8,6 +8,7 @@
 #include "seco-rk3399.dtsi"
 #include "seco-rk3399-opp.dtsi"
 #include "seco-rk3399-vop-clk-set.dtsi"
+#include "dt-bindings/net/ti-dp83867.h"
 
 
 / {
@@ -16,7 +17,7 @@
 
 
     chosen {
-		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1 console=ttyFIQ0,115200n8n rw root=PARTUUID=614e0000-0000 rootfstype=ext4 rootwait coherent_pool=1m";
+		bootargs = "earlycon=uart8250,mmio32,0xff1a0000 swiotlb=1 console=ttyFIQ0,115200n8n rw rootwait coherent_pool=1m";
 		stdout-path = "serial2:115200n8";
 	};
 
@@ -95,7 +96,7 @@
 		regulator-always-on;
 		vin-supply              = <&vcc3v3_sys>;
 	};
-    
+
 
 	vcc5v0_sys: vcc5v-sys {
 		compatible              = "regulator-fixed";
@@ -382,7 +383,7 @@
  * |__________________________________________________________________________|
  */
 &gpu {
-	status      = "okay";
+	status = "okay";
 	mali-supply = <&vdd_gpu>;
 };
 
@@ -404,20 +405,20 @@
 	clocks        = <&cru ACLK_RGA>, <&cru HCLK_RGA>, <&cru SCLK_RGA_CORE>;
 	clock-names   = "aclk_rga", "hclk_rga", "clk_rga";
 	power-domains = <&power RK3399_PD_RGA>;
-	status        = "okay";
+	status = "okay";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
  */
 
 
- /* __________________________________________________________________________
+ /*  __________________________________________________________________________
  * |                                                                          |
  * |                              A/D CONVERTER                               |
  * |__________________________________________________________________________|
  */
 &saradc {
-	status = "okay";
+	status      = "okay";
 };
 /*  __________________________________________________________________________
  * |__________________________________________________________________________|
@@ -673,8 +674,8 @@
 	snps,reset-active-low;
 	snps,reset-delays-us   = <0 10000 50000>;
 	assigned-clocks        = <&cru SCLK_RMII_SRC>;
-    assigned-clock-parents = <&cru SCLK_MAC>;
-    assigned-clock-rates   = <125000000>;
+	assigned-clock-parents = <&cru SCLK_MAC>;
+	assigned-clock-rates   = <125000000>;
 	pinctrl-names          = "default";
 	pinctrl-0              = <&rgmii_pins>;
 	tx_delay               = <0x28>;
@@ -763,7 +764,7 @@
 	// 		logo,kernel = "logo_kernel.bmp";
 	// 		logo,mode = "center";
 	// 		charge_logo,mode = "center";
-	// 		connect = <&vopl_out_dsi>;
+	 		//connect = <&vopl_out_dsi>;
 	// 	};
 
 	// 	route_edp: route-edp {
@@ -1077,7 +1078,7 @@
 
 
 	headphones-sound {
-		status                        = "okay";
+		status                        = "disabled";
 		compatible                    = "simple-audio-card";
 		simple-audio-card,format      = "i2s";
 		simple-audio-card,name        = "rk-tlvcodec-sound";
@@ -1351,6 +1352,7 @@
 		aov-supply       = <&vcc_tlv320>;
 		reset-gpios      = <&gpio3 6 GPIO_ACTIVE_LOW>;
 		hp-det-gpio      = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>; 
+		status		 = "disable";
 	};
 
 
@@ -1372,7 +1374,7 @@
 		//lcd-gpios = <&pca6416_20 9 GPIO_ACTIVE_HIGH>;
 
 	
-        lvds,datamap                = "jeida";
+		lvds,datamap                = "jeida";
 		lvds,dual-channel;
 		lvds,preserve-dsi-timings;
 		
