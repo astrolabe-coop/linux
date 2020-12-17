@@ -1447,6 +1447,7 @@
 		pinctrl-names    = "default";
 		pinctrl-0        = <&pca6416_gpios>;
 		reset-gpio       = <&gpio4 RK_PD0 GPIO_ACTIVE_LOW>;
+		gpio-base	 = <450>;
 		interrupt-parent = <&gpio2>;
 		interrupts       = <RK_PA6 IRQ_TYPE_NONE>;
 		#interrupt-cells = <2>;
@@ -1454,6 +1455,7 @@
 		gpio-controller;
 		interrupt-controller;
 		vcc-supply       = <&vcc3v3_sys>;
+		status		 = "okay";
 	};
 
 
@@ -1602,8 +1604,8 @@
     gpio_expander {
 		pca6416_gpios: pca6416_gpios {
 			rockchip,pins =
-				<2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,	// IRQ
-				<4 RK_PD0 RK_FUNC_GPIO &pcfg_pull_up>;	// RST
+				<2 RK_PA6 RK_FUNC_GPIO &pcfg_pull_up>,		// IRQ
+				<4 RK_PD0 RK_FUNC_GPIO &pcfg_output_high>;	// RST
 		};
 	};
 
