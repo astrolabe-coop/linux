@@ -5,6 +5,6 @@
 menu "SECO mxc support"
 
 config SECO_GSM_POWER_MANAGER
-	bool "SECO GSM modem power management"
+	tristate "SECO GSM modem power management"
 endmenu
 

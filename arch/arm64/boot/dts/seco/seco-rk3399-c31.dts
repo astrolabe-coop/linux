@@ -699,15 +699,15 @@
  */
 / {
 	gsm_power: gsm_power {
-		compatible    = "seco,gsm-pwr-mng";
+		compatible    = "seco,gsm-modem";
 		pinctrl-names = "default";
 		pinctrl-0     = <&gsm_modem_pwr>;
 		rst-gpios     = <&gpio1 RK_PC7 GPIO_ACTIVE_LOW>;
 		rst-active-low; 
 		usben-gpios   = <&gpio2 RK_PA4 GPIO_ACTIVE_LOW>;
 		usben-active-low; 
-		//vgsm-gpios    = <&pca6416 2 GPIO_ACTIVE_HIGH>;
-		//vgsm-active-low;
+		vgsm-gpios    = <&pca6416 2 GPIO_ACTIVE_HIGH>;
+		vgsm-active-low;
 		pwrkey-gpios  = <&gpio2 RK_PA2 GPIO_ACTIVE_HIGH>;
 		pwr-active-low;
 		status        = "okay";
