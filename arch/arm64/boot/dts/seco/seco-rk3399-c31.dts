@@ -139,7 +139,7 @@
 		regulator-min-microvolt = <3300000>;
 		regulator-max-microvolt = <3300000>;
 		enable-active-high;
-        startup-delay-us        = <1000>;
+        	startup-delay-us        = <1000>;
 	};
 
 
@@ -1083,12 +1083,12 @@
 
 
 	headphones-sound {
-		status                        = "disabled";
+		status                        = "okay";
 		compatible                    = "simple-audio-card";
 		simple-audio-card,format      = "i2s";
 		simple-audio-card,name        = "rk-tlvcodec-sound";
 		simple-audio-card,mclk-fs     = <256>;
-		simple-audio-card,hp-det-gpio = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
+//		simple-audio-card,hp-det-gpio = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>;
 
 		simple-audio-card,cpu {
 			bitclock-master;
@@ -1355,9 +1355,9 @@
 		iov-supply       = <&vcc_tlv320>;
 		dov-supply       = <&vcc_tlv320>;
 		aov-supply       = <&vcc_tlv320>;
-		reset-gpios      = <&gpio3 6 GPIO_ACTIVE_LOW>;
-		hp-det-gpio      = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>; 
-		status		 = "disable";
+		reset-gpios      = <&gpio3 RK_PD6 GPIO_ACTIVE_LOW>;
+//		hp-det-gpio      = <&gpio2 RK_PA7 GPIO_ACTIVE_LOW>; 
+		status		 = "okay";
 	};
 
 
@@ -1689,8 +1689,7 @@
 
 		codec_audio: codec-audio {
 			rockchip,pins =
-				<3 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>,
-				<2 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
+				<3 RK_PD6 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 	};
 
