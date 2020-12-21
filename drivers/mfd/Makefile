@@ -2,7 +2,8 @@
 # Makefile for multifunction miscellaneous devices
 #
 
-88pm860x-objs			:= 88pm860x-core.o 88pm860x-i2c.o
+88pm860x-objs			    := 88pm860x-core.o 88pm860x-i2c.o
+obj-$(CONFIG_MFD_TDA1997)   += tda1997x-core.o
 obj-$(CONFIG_MFD_88PM860X)	+= 88pm860x.o
 obj-$(CONFIG_MFD_88PM800)	+= 88pm800.o 88pm80x.o
 obj-$(CONFIG_MFD_88PM805)	+= 88pm805.o 88pm80x.o
