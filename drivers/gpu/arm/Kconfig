@@ -30,6 +30,9 @@ config MALI_MIDGARD_FOR_ANDROID
 config MALI_MIDGARD_FOR_LINUX
 	bool "Mali Midgard for Linux only"
 
+config MALI_MIDGARD_NONE
+	bool "None"
+
 endchoice
 
 source "drivers/gpu/arm/midgard/Kconfig"
