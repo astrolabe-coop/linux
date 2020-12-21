@@ -647,6 +647,12 @@ config MFD_PCF50633
 	  facilities, and registers devices for the various functions
 	  so that function-specific drivers can bind to them.
 
+config MFD_TDA1997
+	tristate "NXP TDA RGB19987 to HDMI converter"
+	depends on I2C
+	---help---
+	  This is the core driver for NXP TDA19987 RGB to HDMI converter
+
 config PCF50633_ADC
 	tristate "NXP PCF50633 ADC"
 	depends on MFD_PCF50633
