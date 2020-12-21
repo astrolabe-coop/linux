@@ -235,16 +235,15 @@
 
 &gmac {
 	phy-supply = <&vcc_phy>;
+	assigned-clocks = <&cru SCLK_GMAC>;
+	assigned-clock-parents = <&gmac_clkin>;
 	clock_in_out = "input";
     phy-mode = "rmii";
     pinctrl-names = "default";
-    pinctrl-0 = <&rmii_pins &mac_refclk_input &eth_phy_pwr>;
+    pinctrl-0 = <&rmii_pins &eth_phy_pwr>;
 	snps,reset-gpio = <&gpio2 11 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 100000 100000>;
-	max-speed=<100>;
-//	tx_delay = <0x0>;
-// 	rx_delay=<0x0>;
 	status = "okay";
 };
 
@@ -734,42 +733,31 @@
 
 	pmic {
 		pmic_int: pmic_int {
-			rockchip,pins =
-				<0 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
+			rockchip,pins = <0 RK_PA7 RK_FUNC_GPIO &pcfg_pull_up>;
 		};
 
 		soc_slppin_gpio: soc_slppin_gpio {
-			rockchip,pins =
-				<0 RK_PA4 RK_FUNC_GPIO &pcfg_output_low>;
+			rockchip,pins = <0 RK_PA4 RK_FUNC_GPIO &pcfg_output_low>;
 		};
 
 		soc_slppin_slp: soc_slppin_slp {
-			rockchip,pins =
-				<0 RK_PA4 RK_FUNC_1 &pcfg_pull_none>;
+			rockchip,pins = <0 RK_PA4 RK_FUNC_1 &pcfg_pull_none>;
 		};
 
 		soc_slppin_rst: soc_slppin_rst {
-			rockchip,pins =
-				<0 RK_PA4 RK_FUNC_2 &pcfg_pull_none>;
+			rockchip,pins = <0 RK_PA4 RK_FUNC_2 &pcfg_pull_none>;
 		};
 	};
 
   	eth_phy {
 		eth_phy_pwr: eth_phy_pwr {
-                        rockchip,pins =
-                                <2 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
-                };
+           rockchip,pins = <2 RK_PB3 RK_FUNC_GPIO &pcfg_pull_none>;
         };
-
-    gmac {
-        mac_refclk_input: mac-refclk-in {
-                rockchip,pins = <2 RK_PB2 RK_FUNC_2 &pcfg_input>;
-            };
-	};
+    };
 
 	sdmmc_pwr  {
         sdmmc_pwr: sdmmc_pwr {
-               rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>;
+             rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>;
         };
 	};
 
@@ -789,11 +777,10 @@
 	};
 
 	lcd_vdd_gpio {
-                lcd_vdd_gpio_en: lcd_vdd_gpio_en {
-                        rockchip,pins =
-                         <3 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
-                };
+        lcd_vdd_gpio_en: lcd_vdd_gpio_en {
+           rockchip,pins = <3 RK_PA4 RK_FUNC_GPIO &pcfg_pull_up>;
         };
+    };
 
 	px30_lanxus_gpioset{
 		lanxus_gpioset: lanxus-gpioset {
