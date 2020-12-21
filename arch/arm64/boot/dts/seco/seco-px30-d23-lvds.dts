@@ -11,7 +11,7 @@
 	compatible = "rockchip,linux", "rockchip,rk3326";
 
 	chosen {
-		bootargs = "earlycon=uart8250,mmio32,0xff160000 swiotlb=1 console=ttyFIQ2 rw root=/dev/mmcblk0p8 rootwait";
+		bootargs = "swiotlb=1 console=ttyFIQ0 rw rootwait board_revA-LVDS";
 	};
 
 	backlight: backlight {

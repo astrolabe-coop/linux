@@ -4,8 +4,6 @@
  */
 
 /dts-v1/;
-#include <dt-bindings/clock/rk618-cru.h>
-#include <dt-bindings/display/media-bus-format.h>
 #include <dt-bindings/gpio/gpio.h>
 #include <dt-bindings/pinctrl/rockchip.h>
 #include <dt-bindings/input/input.h>
@@ -14,11 +12,9 @@
 #include "seco-px30.dtsi"
 
 / {
-	model = "Seco D23 PX30";
-	compatible = "rockchip,linux", "rockchip,rk3326", "adlink,lec-px30";
-
-	chosen {
-		bootargs = "earlycon=uart8250,mmio32,0xff160000 swiotlb=1 console=ttyFIQ2 rw root=/dev/mmcblk0p8 rootwait";
+	aliases {
+        mmc0 = &emmc;
+        mmc1 = &sdmmc;
 	};
 
 	fiq-debugger {
@@ -104,7 +100,7 @@
                 compatible = "fixed-clock";
                 #clock-cells = <0>;
                 clock-frequency = <20000000>;
-        };
+    };
 
 	vcc_phy: vcc-phy-regulator {
 		compatible = "regulator-fixed";
@@ -241,7 +237,7 @@
     phy-mode = "rmii";
     pinctrl-names = "default";
     pinctrl-0 = <&rmii_pins &eth_phy_pwr>;
-	snps,reset-gpio = <&gpio2 11 GPIO_ACTIVE_LOW>;
+	snps,reset-gpio = <&gpio2 RK_PB3 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 100000 100000>;
 	status = "okay";
@@ -576,11 +572,15 @@
 	vccio1-supply = <&vcc1v8_soc>;
 	vccio2-supply = <&vccio_sd>;
 	vccio3-supply = <&vcc_3v0>;
-	vccio4-supply = <&vcc1v8_dvp>; /*<&vcc3v0_pmu>;*/
-    vccio5-supply = <&vcc1v8_soc>; /*vcc_3v0*/
+	vccio4-supply = <&vcc1v8_dvp>;
+    vccio5-supply = <&vcc1v8_soc>;
 };
 
 &isp_mmu {
+	status = "okay";
+};
+
+&rkisp1 {
 	status = "okay";
 };
 
@@ -602,6 +602,10 @@
 	status = "okay";
 };
 
+&rng {
+    status = "okay";
+};
+  
 &rockchip_suspend {
 	status = "okay";
 	rockchip,sleep-debug-en = <1>;
@@ -625,10 +629,7 @@
 	/*cd-gpios = <&gpio2 4 GPIO_ACTIVE_HIGH>; [> CD GPIO <]*/
 	sd-uhs-sdr12;
 	sd-uhs-sdr25;
-//	sd-uhs-sdr50;
-//	sd-uhs-sdr104;
 	vqmmc-supply = <&vccio_sd>;
-//	vmmc-supply = <&vcc_sd_pwr>;
 	pinctrl-names = "default";
 	pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_bus4>;
 	status = "okay";
@@ -680,7 +681,7 @@
 &uart2 {
         pinctrl-names = "default";
         pinctrl-0 = <&uart2m1_xfer>;
-        status = "disable";
+        status = "disabled";
 };
 
 &u2phy {
@@ -755,11 +756,6 @@
         };
     };
 
-	sdmmc_pwr  {
-        sdmmc_pwr: sdmmc_pwr {
-             rockchip,pins = <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>;
-        };
-	};
 
 	i2c_pcal6416a_u32 {
 		pinctrl_pcal6416a_u32: pinctrl_pcal6416a_u32 {
@@ -792,15 +788,16 @@
 		secod23_gpioset: secod23-gpioset {
 			rockchip,pins = 
                 <0 RK_PA0 RK_FUNC_GPIO &pcfg_output_high>, /* 1P8V_RUN_EN   - GPIO_0  */
-                <0 RK_PA1 RK_FUNC_GPIO &pcfg_output_high>, /* M2_SDIO_WAKE# - GPIO_1  */
+                <0 RK_PA1 RK_FUNC_GPIO &pcfg_input>,       /* M2_SDIO_WAKE# - GPIO_1  */
                 <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>, /* VCC_AMP_EN    - GPIO_2  */
 
-                <0 RK_PA5 RK_FUNC_GPIO &pcfg_output_high>, /* TOUCH_INT#    - GPIO_5  */
+                <0 RK_PA5 RK_FUNC_GPIO &pcfg_input>,       /* TOUCH_INT#    - GPIO_5  */
 
                 <0 RK_PB6 RK_FUNC_GPIO &pcfg_output_high>, /* M2_I2C_ALERT# - GPIO_14 */
                 <0 RK_PB7 RK_FUNC_GPIO &pcfg_output_high>, /* AMP_SD#       - GPIO_15 */
 
-                <0 RK_PC1 RK_FUNC_GPIO &pcfg_output_high>, /* M2_UART_WAKE# - GPIO_17 */
+                <0 RK_PC1 RK_FUNC_GPIO &pcfg_input>,       /* M2_UART_WAKE# - GPIO_17 */
+
                 <0 RK_PC4 RK_FUNC_1    &pcfg_output_high>; /* CLKOUT_32K  */
 		};
 	};
