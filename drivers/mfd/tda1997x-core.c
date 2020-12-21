@@ -692,7 +692,6 @@ int mxc_lcd_fb_var_to_vic(struct fb_var_screeninfo *var)
 #define HB(x) (x)
 #define PB(x) (HB(2) + 1 + (x))
 
-#if 1
 static void
 tda998x_write_if(struct tda998x_priv *priv, u8 bit, u16 addr,
 		 union hdmi_infoframe *frame)
@@ -877,7 +876,6 @@ static int tda998x_connector_mode_valid(struct drm_connector *connector,
 }
 
 
-#if 1
 static int read_edid_block(void *data, u8 *buf, unsigned int blk, size_t length)
 {
 	struct tda998x_priv *priv = data;
@@ -972,7 +970,6 @@ static int tda998x_connector_get_modes(struct drm_connector *connector)
 
 	return n;
 }
-#endif
 
 static int tda998x_connector_init(struct tda998x_priv *priv,
 				  struct drm_device *drm)

@@ -1352,9 +1352,9 @@ void rk3288_vpu_h264e_done(struct rockchip_vpu_ctx *ctx,
 			ctx->run.h264e.sps.byte_cnt;
 		ctx->run.dst->h264e.pps_size =
 			ctx->run.h264e.pps.byte_cnt;
-		vpu_debug(1, "sps %d, pps %d\n",
-				ctx->run.dst->h264e.sps_size,
-				ctx->run.dst->h264e.pps_size);
+//		vpu_debug(1, "sps %d, pps %d\n",
+//				ctx->run.dst->h264e.sps_size,
+//				ctx->run.dst->h264e.pps_size);
 	} else {
 		ctx->run.dst->h264e.sps_size = 0;
 		ctx->run.dst->h264e.pps_size = 0;
