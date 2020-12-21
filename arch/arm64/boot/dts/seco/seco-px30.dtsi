@@ -30,8 +30,6 @@
 		i2c1 = &i2c1;
 		i2c2 = &i2c2;
 		i2c3 = &i2c3;
-        mmc0 = &emmc;
-        mmc1 = &sdmmc;
 		serial0 = &uart0;
 		serial1 = &uart1;
 		serial2 = &uart2;
@@ -238,29 +236,6 @@
 		interrupt-affinity = <&cpu0>, <&cpu1>, <&cpu2>, <&cpu3>;
 	};
 
-	bus_soc: bus-soc {
-		compatible = "rockchip,px30-bus";
-		rockchip,busfreq-policy = "autocs";
-		soc-bus0 {
-			bus-id = <0>;
-			timer-us = <20>;
-			enable-msk = <0x40f7>;
-			status = "disabled";
-		};
-		soc-bus1 {
-			bus-id = <1>;
-			timer-us = <200>;
-			enable-msk = <0x40bf>;
-			status = "disabled";
-		};
-		soc-bus2 {
-			bus-id = <2>;
-			timer-us = <200>;
-			enable-msk = <0x4007>;
-			status = "disabled";
-		};
-	};
-
 	bus_apll: bus-apll {
 		compatible = "rockchip,px30-bus";
 		rockchip,busfreq-policy = "clkfreq";
@@ -457,7 +432,7 @@
 			status = "disabled";
 		};
 
-		reboot-mode {
+		reboot_mode: reboot-mode {
 			compatible = "syscon-reboot-mode";
 			offset = <0x200>;
 			mode-bootloader = <BOOT_BL_DOWNLOAD>;
@@ -574,6 +549,34 @@
 		status = "disabled";
 	};
 
+	crypto: crypto@ff0b0000 {
+		compatible = "rockchip,px30-crypto";
+		reg = <0x0 0xff0b0000 0x0 0x4000>;
+		interrupts = <GIC_SPI 82 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&cru ACLK_CRYPTO >, <&cru HCLK_CRYPTO >,
+			<&cru SCLK_CRYPTO>, <&cru SCLK_CRYPTO_APK>;
+		clock-names = "aclk", "hclk", "sclk", "apb_pclk";
+		resets = <&cru SRST_CRYPTO>;
+		reset-names = "crypto-rst";
+		status = "disabled";
+	};
+
+	rng: rng@ff0b0000 {
+		compatible = "rockchip,cryptov2-rng";
+		reg = <0x0 0xff0b0000 0x0 0x4000>;
+		clocks = <&cru SCLK_CRYPTO>, <&cru SCLK_CRYPTO_APK>,
+			<&cru ACLK_CRYPTO>, <&cru HCLK_CRYPTO>;
+		clock-names = "clk_crypto", "clk_crypto_apk",
+				"aclk_crypto", "hclk_crypto";
+		assigned-clocks = <&cru SCLK_CRYPTO>, <&cru SCLK_CRYPTO_APK>,
+					<&cru ACLK_CRYPTO>, <&cru HCLK_CRYPTO>;
+		assigned-clock-rates = <150000000>, <150000000>,
+					<200000000>, <100000000>;
+		resets = <&cru SRST_CRYPTO>;
+		reset-names = "reset";
+		status = "disabled";
+	};
+
 	gic: interrupt-controller@ff131000 {
 		compatible = "arm,gic-400";
 		#interrupt-cells = <3>;
@@ -602,7 +605,7 @@
 			compatible = "rockchip,px30-lvds";
 			phys = <&video_phy>;
 			phy-names = "phy";
-			status = "okay";
+			status = "disabled";
 
 			ports {
 				#address-cells = <1>;
@@ -802,10 +805,9 @@
 		clock-names = "spiclk", "apb_pclk";
 		dmas = <&dmac 12>, <&dmac 13>;
 		dma-names = "tx", "rx";
-		/*cs-gpios = <&gpio1 RK_PB6 GPIO_ACTIVE_LOW>;*/
 		pinctrl-names = "default", "high_speed";
-		pinctrl-0 = <&spi0_clk /*&spi0_csn*/ &spi0_miso &spi0_mosi>;
-		pinctrl-1 = <&spi0_clk_hs /*&spi0_csn*/ &spi0_miso_hs &spi0_mosi_hs>;
+		pinctrl-0 = <&spi0_clk &spi0_csn &spi0_miso &spi0_mosi>;
+		pinctrl-1 = <&spi0_clk_hs &spi0_csn &spi0_miso_hs &spi0_mosi_hs>;
 		status = "disabled";
 	};
 
@@ -1145,7 +1147,7 @@
 		reset-names = "rst";
 		power-domains = <&power PX30_PD_VO>;
 		#phy-cells = <0>;
-		status = "okay";
+		status = "disabled";
 	};
 
 	mipi_dphy_rx0: mipi-dphy-rx0@ff2f0000 {
@@ -1237,7 +1239,6 @@
 		interrupts = <GIC_SPI 54 IRQ_TYPE_LEVEL_HIGH>;
 		pinctrl-names = "default";
 		pinctrl-0 = <&sdmmc_clk &sdmmc_cmd &sdmmc_det &sdmmc_bus4>;
-		/*pinctrl-0 = <&sdmmc_clk_4ma &sdmmc_cmd_4ma &sdmmc_det_4ma &sdmmc_bus4_4ma>;*/
 		status = "disabled";
 	};
 
@@ -1270,6 +1271,18 @@
 		power-domains = <&power PX30_PD_MMC_NAND>;
 		fifo-depth = <0x100>;
 		interrupts = <GIC_SPI 53 IRQ_TYPE_LEVEL_HIGH>;
+		status = "disabled";
+	};
+
+	sfc: sfc@ff3a0000 {
+		compatible = "rockchip,sfc";
+		reg = <0x0 0xff3a0000 0x0 0x4000>;
+		interrupts = <GIC_SPI 56 IRQ_TYPE_LEVEL_HIGH>;
+		clocks = <&cru SCLK_SFC>, <&cru HCLK_SFC>;
+		clock-names = "clk_sfc", "hclk_sfc";
+		assigned-clocks = <&cru SCLK_SFC>;
+		assigned-clock-rates = <100000000>;
+		power-domains = <&power PX30_PD_MMC_NAND>;
 		status = "disabled";
 	};
 
@@ -1556,7 +1569,7 @@
 	vopl_mmu: iommu@ff470f00 {
 		compatible = "rockchip,iommu";
 		reg = <0x0 0xff470f00 0x0 0x100>;
-		interrupts = <GIC_SPI 79 IRQ_TYPE_LEVEL_HIGH>;
+		interrupts = <GIC_SPI 78 IRQ_TYPE_LEVEL_HIGH>;
 		interrupt-names = "vopl_mmu";
 		clocks = <&cru ACLK_VOPL>, <&cru HCLK_VOPL>;
 		clock-names = "aclk", "hclk";
@@ -1879,6 +1892,13 @@
 			opp-microvolt-L3 = <1000000>;
 			status = "disabled";
 		};
+	};
+
+	rockchip_system_monitor: rockchip-system-monitor {
+		compatible = "rockchip,system-monitor";
+
+		rockchip,thermal-zone = "soc-thermal";
+		rockchip,polling-delay = <200>; /* milliseconds */
 	};
 
 	pinctrl: pinctrl {
@@ -2518,34 +2538,6 @@
 					<1 RK_PD4 RK_FUNC_1 &pcfg_pull_up_8ma>,
 					<1 RK_PD5 RK_FUNC_1 &pcfg_pull_up_8ma>;
 			};
-
-			sdmmc_clk_4ma: sdmmc-clk-4ma {
-                                rockchip,pins =
-                                        <1 RK_PD6 RK_FUNC_1 &pcfg_pull_none_4ma>;
-                        };
-
-                        sdmmc_cmd_4ma: sdmmc-cmd-4ma {
-                                rockchip,pins =
-                                        <1 RK_PD7 RK_FUNC_1 &pcfg_pull_up_4ma>;
-                        };
-
-                        sdmmc_det_4ma: sdmmc-det-4ma {
-                                rockchip,pins =
-                                        <0 RK_PA3 RK_FUNC_1 &pcfg_pull_up_4ma>;
-                        };
-
-                        sdmmc_bus1_4ma: sdmmc-bus1-4ma {
-                                rockchip,pins =
-                                        <1 RK_PD2 RK_FUNC_1 &pcfg_pull_up_4ma>;
-                        };
-
-                        sdmmc_bus4_4ma: sdmmc-bus4-4ma {
-                                rockchip,pins =
-                                        <1 RK_PD2 RK_FUNC_1 &pcfg_pull_up_4ma>,
-                                        <1 RK_PD3 RK_FUNC_1 &pcfg_pull_up_4ma>,
-                                        <1 RK_PD4 RK_FUNC_1 &pcfg_pull_up_4ma>,
-                                        <1 RK_PD5 RK_FUNC_1 &pcfg_pull_up_4ma>;
-                        };
 
 			sdmmc_gpio: sdmmc-gpio {
 				rockchip,pins =
