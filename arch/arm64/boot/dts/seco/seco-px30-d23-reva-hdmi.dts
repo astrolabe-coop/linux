@@ -4,7 +4,7 @@
  */
 
 /dts-v1/;
-#include "seco-px30-d23.dtsi"
+#include "seco-px30-d23-reva.dtsi"
 
 / {
 	model = "Seco D23 PX30 - HDMI video output";
