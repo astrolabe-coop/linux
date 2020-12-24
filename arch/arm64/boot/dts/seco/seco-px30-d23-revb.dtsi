@@ -234,9 +234,11 @@
 	assigned-clocks = <&cru SCLK_GMAC>;
 	assigned-clock-parents = <&gmac_clkin>;
 	clock_in_out = "input";
-    phy-mode = "rmii";
-    pinctrl-names = "default";
-    pinctrl-0 = <&rmii_pins &eth_phy_pwr>;
+	phy-mode = "rmii";
+	pinctrl-names = "default";
+	pinctrl-0 = <&rmii_pins &mac_refclk &eth_phy_pwr &eth_phy_int>;
+//    interrupt-parent = <&gpio2>;
+//    interrupts = <RK_PB0 IRQ_TYPE_LEVEL_LOW>;
 	snps,reset-gpio = <&gpio2 RK_PB3 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 100000 100000>;
@@ -268,6 +270,7 @@
 
 &i2c0 {
 	status = "okay";
+	clock-frequency = <400000>;
 
 	rk809: pmic@20 {
 		compatible = "rockchip,rk809";
@@ -510,6 +513,7 @@
 
 			vcc3v3_lcd: SWITCH_REG1 {
 				regulator-boot-on;
+				regulator-always-on;
 				regulator-name = "vcc3v3_lcd";
 			};
 
@@ -756,6 +760,11 @@
         };
     };
 
+  	eth_int {
+		eth_phy_int: eth_phy_int {
+                rockchip,pins = <2 RK_PB0 RK_FUNC_GPIO &pcfg_input>;
+        };
+  	};
 
 	i2c_pcal6416a_u32 {
 		pinctrl_pcal6416a_u32: pinctrl_pcal6416a_u32 {
