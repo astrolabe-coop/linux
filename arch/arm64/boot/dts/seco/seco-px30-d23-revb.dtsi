@@ -120,6 +120,95 @@
 		regulator-max-microvolt = <5000000>;
 	};
 
+	vdd_m2: vdd_m2 {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_m2";
+        enable-active-high;
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+	};
+
+	reg_1p8v_run_en: reg_1p8v_run_en {
+		compatible = "regulator-fixed";
+		regulator-name = "reg_1p8v_run_en";
+        enable-active-high;
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
+	};
+
+	usb1_pwr_en: usb1_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb1_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 2 GPIO_ACTIVE_LOW>;
+	};
+
+	usb2_pwr_en: usb2_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb2_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 3 GPIO_ACTIVE_LOW>;
+	};
+
+	usb3_pwr_en: usb3_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb3_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 4 GPIO_ACTIVE_LOW>;
+	};
+
+	usb4_pwr_en: usb4_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb3_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 5 GPIO_ACTIVE_LOW>;
+	};
+
+    vdd_m2_enabler: en_vdd-m2 {
+        compatible = "reg-userspace-consumer";
+        regulator-name = "en_vdd-m2";
+        regulator-supplies = "vdd_m2";
+        vdd_m2-supply = <&vdd_m2>;
+        regulator-boot-on;
+    };
+
+    reg_1p8v_enabler: reg_1p8v_enabler {
+        compatible = "reg-userspace-consumer";
+        regulator-name = "en_1p8v_run";
+        regulator-supplies = "reg_1p8v_run_en";
+        reg_1p8v_run_en-supply = <&reg_1p8v_run_en>;
+        regulator-boot-on;
+    };
+
+    vbus_pwr_enabler: vbus_pwr_enabler {
+        compatible = "reg-userspace-consumer";
+        regulator-boot-on;
+        regulator-name = "vbus_pwr_enabler";
+        regulator-supplies = "usb1_pwr_en", "usb2_pwr_en", "usb3_pwr_en", "usb4_pwr_en", "hub_usb_rst";
+        usb1_pwr_en-supply = <&usb1_pwr_en>;
+        usb2_pwr_en-supply = <&usb2_pwr_en>;
+        usb3_pwr_en-supply = <&usb3_pwr_en>;
+        usb4_pwr_en-supply = <&usb4_pwr_en>;
+    };
+
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 
@@ -559,7 +648,7 @@
 		gpio-base = <272>;
 		gpio-controller;
 		#gpio-cells = <2>;
-		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+//		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
 		interrupt-parent = <&gpio0>;
 		interrupts = <RK_PA3 0x2>;
 		interrupt-controller;
