@@ -9,6 +9,7 @@ dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revb-hdmi.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revb-lvds.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revc-hdmi.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revc-lvds.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revb-hdmi-lvds.dtb
 
 dts-dirs += overlays
 
