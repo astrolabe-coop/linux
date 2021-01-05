@@ -741,11 +741,16 @@
 
 &sdio {
 	bus-width = <4>;
+	sd-uhs-sdr12;
 	sd-uhs-sdr25;
+	sd-uhs-sdr50;
+	sd-uhs-sdr104;
+	mmc-hs200-1_8v;
 	supports-sdio;
 	ignore-pm-notify;
 	keep-power-in-suspend;
 	non-removable;
+	cap-sdio-irq;
 	mmc-pwrseq = <&sdio_pwrseq>;
 	status = "okay";
 };
