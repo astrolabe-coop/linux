@@ -24,6 +24,7 @@
 #include <sound/core.h>
 #include <sound/pcm_params.h>
 #include <sound/soc.h>
+#include <sound/tlv.h>
 #include "rk817_codec.h"
 
 static int dbg_enable;
@@ -600,6 +601,69 @@ static int rk817_playback_path_put(struct snd_kcontrol *kcontrol,
 	return 0;
 }
 
+static int rk817_volume_get(struct snd_kcontrol *kcontrol,
+				  struct snd_ctl_elem_value *ucontrol)
+{
+    int val = 0;
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+	struct soc_mixer_control *mc =
+		(struct soc_mixer_control *)kcontrol->private_value;
+	int max = mc->max;
+	int reg = mc->reg;
+	unsigned int invert = mc->invert;
+
+    if (reg == 0)
+	    val = snd_soc_read(codec, RK817_CODEC_DDAC_VOLL);
+
+    if (reg == 1)
+	    val = snd_soc_read(codec, RK817_CODEC_DADC_VOLL);
+
+    if (invert == 1)
+        val = max - val;
+
+    ucontrol->value.integer.value[0] = val;
+	return 0;
+}
+
+static int rk817_volume_put(struct snd_kcontrol *kcontrol,
+				  struct snd_ctl_elem_value *ucontrol)
+{
+    int val;
+	struct snd_soc_codec *codec = snd_soc_kcontrol_codec(kcontrol);
+	struct rk817_codec_priv *rk817 = snd_soc_codec_get_drvdata(codec);
+	struct soc_mixer_control *mc =
+		(struct soc_mixer_control *)kcontrol->private_value;
+	int max = mc->max;
+	int reg = mc->reg;
+	unsigned int invert = mc->invert;
+
+
+	val = (int) ucontrol->value.integer.value[0];
+
+    if (val < 0)
+      val = 0;
+
+    if (val > 0xff)
+      val = 0xff;
+
+    if (invert == 1)
+        val = max - val;
+
+    if (reg == 0) {
+        rk817->hp_volume = val;
+	    snd_soc_write(codec, RK817_CODEC_DDAC_VOLL, val);
+	    snd_soc_write(codec, RK817_CODEC_DDAC_VOLR, val);
+    }
+
+    if (reg == 1) {
+        rk817->capture_volume = val;
+	    snd_soc_write(codec, RK817_CODEC_DADC_VOLL, val);
+	    snd_soc_write(codec, RK817_CODEC_DADC_VOLR, val);
+    }
+
+	return 0;
+}
+
 static int rk817_capture_path_get(struct snd_kcontrol *kcontrol,
 				  struct snd_ctl_elem_value *ucontrol)
 {
@@ -698,6 +762,9 @@ static struct snd_kcontrol_new rk817_snd_path_controls[] = {
 
 	SOC_ENUM_EXT("Capture MIC Path", rk817_capture_path_type,
 		     rk817_capture_path_get, rk817_capture_path_put),
+
+    SOC_SINGLE_EXT("IN_Volume",  1, 0, 255, 1, rk817_volume_get, rk817_volume_put),
+    SOC_SINGLE_EXT("OUT_Volume", 0, 0, 255, 1, rk817_volume_get, rk817_volume_put),
 };
 
 static int rk817_set_dai_sysclk(struct snd_soc_dai *codec_dai,
