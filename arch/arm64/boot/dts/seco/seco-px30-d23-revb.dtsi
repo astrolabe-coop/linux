@@ -221,6 +221,26 @@
 		reset-gpios = <&gpio_expanderA_u32 10 GPIO_ACTIVE_LOW>; 
 	};
 
+	rk809_sound: rk809-sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,name = "rockchip,rk809-codec";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets =
+			"Microphone", "Mic Jack",
+			"Headphone", "Headphone Jack";
+		simple-audio-card,routing =
+			"Mic Jack", "MICBIAS1",
+			"IN1P", "Mic Jack",
+			"Headphone Jack", "HPOL",
+			"Headphone Jack", "HPOR";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s1_2ch>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&rk809_codec>;
+		};
+	};
 };
 
 &bus_apll {
@@ -612,6 +632,18 @@
 				regulator-name = "vcc5v0_host";
 			};
 		};
+
+		rk809_codec: codec {
+			#sound-dai-cells = <0>;
+			compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
+			clocks = <&cru SCLK_I2S1_OUT>;
+			clock-names = "mclk";
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2s1_2ch_mclk>;
+			hp-volume = <20>;
+			spk-volume = <3>;
+			status = "okay";
+		};
 	};
 };
 
@@ -762,6 +794,11 @@
 	status = "okay";
 };
 
+&i2s1_2ch {
+	status = "okay";
+	#sound-dai-cells = <0>;
+};
+
 /*change to uart0 debug*/
 &uart0 {
         pinctrl-names = "default";
@@ -872,6 +909,20 @@
 			rockchip,pins =
 //             <1 RK_PB0 RK_FUNC_GPIO &pcfg_output_low>, /* IO_EXPB_RST#  - GPIO_40 */
              <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>; /* IO_EXPB_INT#  - GPIO_3 */
+		};
+	};
+
+	i2s1 {
+		i2s1_2ch_bus: i2s1-2ch-bus {
+			rockchip,pins =
+				<2 RK_PC1 RK_FUNC_1 &pcfg_pull_none>,
+				<2 RK_PC2 RK_FUNC_1 &pcfg_pull_none>,
+				<2 RK_PC4 RK_FUNC_1 &pcfg_pull_none>,
+				<2 RK_PC5 RK_FUNC_1 &pcfg_pull_none>;
+		};
+
+		i2s_8ch_mclk: i2s-8ch-mclk {
+				rockchip,pins = <2 RK_PC3 RK_FUNC_1 &pcfg_pull_none>;
 		};
 	};
 
