@@ -2059,6 +2059,13 @@ static int option_probe(struct usb_serial *serial,
 	    iface_desc->bInterfaceNumber <= 1)
 		return -ENODEV;
 
+    /* Quectel EC25&EC21&EG91&EG95&EG06&EP06&EM06&BG96/AG35's interface 4 
+     * can be used as USB network device
+     */
+	if (dev_desc->idVendor == cpu_to_le16(0x2C7C) && 
+	    iface_desc->bInterfaceNumber >= 4)
+	    return -ENODEV;
+
 	/* Store the device flags so we can use them during attach. */
 	usb_set_serial_data(serial, (void *)device_flags);
 

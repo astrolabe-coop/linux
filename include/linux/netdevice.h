@@ -1487,6 +1487,7 @@ enum netdev_priv_flags {
  *	@rtnl_link_state:	This enum represents the phases of creating
  *				a new link
  *
+ *	@needs_free_netdev:	Should unregister perform free_netdev?
  *	@destructor:		Called from unregister,
  *				can be used to call free_netdev
  *	@npinfo:		XXX: need comments on this one
@@ -1752,6 +1753,7 @@ struct net_device {
 		RTNL_LINK_INITIALIZING,
 	} rtnl_link_state:16;
 
+	bool needs_free_netdev;
 	void (*destructor)(struct net_device *dev);
 
 #ifdef CONFIG_NETPOLL
