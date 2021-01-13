@@ -1498,7 +1498,7 @@
 	status = "okay";
 
 	can1: can1@0 {
-        compatible          = "microchip,mcp2517fd";
+        	compatible          = "microchip,mcp2517fd";
 		reg                 = <0>;
 		clocks              = <&ref20M>;
 		pinctrl-names       = "default";
@@ -1507,7 +1507,7 @@
 		interrupts          = <RK_PA3 0x2>;
 		vdd-supply          = <&vcc_3v0>;
 		xceiver-supply      = <&vcc5v0_sys>;
-		spi-min-frequency   = <1000000>;
+		//spi-min-frequency   = <1000000>;
 		spi-max-frequency   = <1000000>;
 		status              = "disabled";
     };
@@ -1521,7 +1521,7 @@
 		reg               = <0>;
 		spi-max-frequency = <20000000>;
 
-		status            = "okay";
+		status            = "disabled";
 
 		partitions {
 			compatible = "fixed-partitions";
@@ -1545,7 +1545,7 @@
 		reg                 = <0>;
 		spi-max-frequency   = <1000000>;
 		//spi-cs-high;
-		status              = "okay";
+		status              = "disabled";
 	};
 
 
