@@ -120,6 +120,105 @@
 		regulator-max-microvolt = <5000000>;
 	};
 
+	vdd_m2: vdd_m2 {
+		compatible = "regulator-fixed";
+		regulator-name = "vdd_m2";
+        enable-active-high;
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+	};
+
+	reg_1p8v_run_en: reg_1p8v_run_en {
+		compatible = "regulator-fixed";
+		regulator-name = "reg_1p8v_run_en";
+        enable-active-high;
+		regulator-always-on;
+		regulator-boot-on;
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		gpio = <&gpio0 RK_PA0 GPIO_ACTIVE_HIGH>;
+	};
+
+	usb1_pwr_en: usb1_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb1_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 2 GPIO_ACTIVE_LOW>;
+	};
+
+	usb2_pwr_en: usb2_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb2_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 3 GPIO_ACTIVE_LOW>;
+	};
+
+	usb3_pwr_en: usb3_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb3_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 4 GPIO_ACTIVE_LOW>;
+	};
+
+	usb4_pwr_en: usb4_pwr_en {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "usb3_pwr_en";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 5 GPIO_ACTIVE_LOW>;
+	};
+
+	pcie_rst: pcie_rst {
+		compatible = "regulator-fixed";
+		regulator-boot-on;
+		regulator-always-on;
+		regulator-name = "pcie_rst";
+		regulator-min-microvolt = <3000000>;
+		regulator-max-microvolt = <3000000>;
+		gpio = <&gpio_expanderA_u32 13 GPIO_ACTIVE_HIGH>;
+	};
+
+    vdd_m2_enabler: en_vdd-m2 {
+        compatible = "reg-userspace-consumer";
+        regulator-name = "en_vdd-m2";
+        regulator-supplies = "vdd_m2";
+        vdd_m2-supply = <&vdd_m2>;
+        regulator-boot-on;
+    };
+
+    reg_1p8v_enabler: reg_1p8v_enabler {
+        compatible = "reg-userspace-consumer";
+        regulator-name = "en_1p8v_run";
+        regulator-supplies = "reg_1p8v_run_en";
+        reg_1p8v_run_en-supply = <&reg_1p8v_run_en>;
+        regulator-boot-on;
+    };
+
+    vbus_pwr_enabler: vbus_pwr_enabler {
+        compatible = "reg-userspace-consumer";
+        regulator-boot-on;
+        regulator-name = "vbus_pwr_enabler";
+        regulator-supplies = "usb1_pwr_en", "usb2_pwr_en", "usb3_pwr_en", "usb4_pwr_en", "hub_usb_rst";
+        usb1_pwr_en-supply = <&usb1_pwr_en>;
+        usb2_pwr_en-supply = <&usb2_pwr_en>;
+        usb3_pwr_en-supply = <&usb3_pwr_en>;
+        usb4_pwr_en-supply = <&usb4_pwr_en>;
+    };
+
 	sdio_pwrseq: sdio-pwrseq {
 		compatible = "mmc-pwrseq-simple";
 
@@ -132,6 +231,26 @@
 		reset-gpios = <&gpio_expanderA_u32 10 GPIO_ACTIVE_LOW>; 
 	};
 
+	rk809_sound: rk809-sound {
+		compatible = "simple-audio-card";
+		simple-audio-card,format = "i2s";
+		simple-audio-card,name = "rockchip,rk809-codec";
+		simple-audio-card,mclk-fs = <256>;
+		simple-audio-card,widgets =
+			"Microphone", "Mic Jack",
+			"Headphone", "Headphone Jack";
+		simple-audio-card,routing =
+			"Mic Jack", "MICBIAS1",
+			"IN1P", "Mic Jack",
+			"Headphone Jack", "HPOL",
+			"Headphone Jack", "HPOR";
+		simple-audio-card,cpu {
+			sound-dai = <&i2s1_2ch>;
+		};
+		simple-audio-card,codec {
+			sound-dai = <&rk809_codec>;
+		};
+	};
 };
 
 &bus_apll {
@@ -234,9 +353,9 @@
 	assigned-clocks = <&cru SCLK_GMAC>;
 	assigned-clock-parents = <&gmac_clkin>;
 	clock_in_out = "input";
-    phy-mode = "rmii";
-    pinctrl-names = "default";
-    pinctrl-0 = <&rmii_pins &eth_phy_pwr>;
+	phy-mode = "rmii";
+	pinctrl-names = "default";
+	pinctrl-0 = <&rmii_pins &mac_refclk &eth_phy_pwr &eth_phy_int>;
 	snps,reset-gpio = <&gpio2 RK_PB3 GPIO_ACTIVE_LOW>;
 	snps,reset-active-low;
 	snps,reset-delays-us = <0 100000 100000>;
@@ -250,7 +369,7 @@
 
 &spi0 {
         status = "okay";
-        max-freq = <48000000>;
+//        max-freq = <48000000>;
 		pinctrl-0 = <&spi0_clk &spi0_csn &spi0_miso &spi0_mosi>;
 		pinctrl-1 = <&spi0_clk_hs &spi0_csn &spi0_miso_hs &spi0_mosi_hs>;
 	    spi_dev@0 {
@@ -268,6 +387,7 @@
 
 &i2c0 {
 	status = "okay";
+	clock-frequency = <400000>;
 
 	rk809: pmic@20 {
 		compatible = "rockchip,rk809";
@@ -510,6 +630,7 @@
 
 			vcc3v3_lcd: SWITCH_REG1 {
 				regulator-boot-on;
+				regulator-always-on;
 				regulator-name = "vcc3v3_lcd";
 			};
 
@@ -519,18 +640,35 @@
 				regulator-name = "vcc5v0_host";
 			};
 		};
+
+		rk809_codec: codec {
+			#sound-dai-cells = <0>;
+			compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
+			clocks = <&cru SCLK_I2S1_OUT>;
+			clock-names = "mclk";
+			pinctrl-names = "default";
+			pinctrl-0 = <&i2s1_2ch_mclk>;
+			hp-volume = <20>;
+			spk-volume = <3>;
+			status = "okay";
+		};
 	};
 };
 
 &i2c1 {
 	status = "okay";
 	clock-frequency = <400000>;
-	/*rtc pcf8563 i2c0-->i2c1*/
 
 	rtc@51 {
-        compatible = "nxp,pcf8563";
+        compatible = "nxp,pcf85063";
         reg = <0x51>;
     };
+
+	at24@52 {
+		compatible = "at24,24aa025";
+		pagesize   = <256>;
+		reg        = <0x52>;
+	};
 
 	gpio_expanderA_u32: pcal6416@20 {
 		compatible = "nxp,pcal6416";
@@ -540,7 +678,7 @@
 		gpio-base = <256>;
 		gpio-controller;
 		#gpio-cells = <2>;
-		reset-gpios = <&gpio1 RK_PB3 GPIO_ACTIVE_HIGH>;
+		reset-gpios = <&gpio0 RK_PB6 GPIO_ACTIVE_HIGH>;
 //		interrupt-parent = <&gpio4>;
 //		interrupts = <16 0x2>;
 		interrupt-controller;
@@ -555,7 +693,7 @@
 		gpio-base = <272>;
 		gpio-controller;
 		#gpio-cells = <2>;
-		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
+//		reset-gpios = <&gpio1 RK_PB0 GPIO_ACTIVE_HIGH>;
 		interrupt-parent = <&gpio0>;
 		interrupts = <RK_PA3 0x2>;
 		interrupt-controller;
@@ -648,11 +786,16 @@
 
 &sdio {
 	bus-width = <4>;
+	sd-uhs-sdr12;
 	sd-uhs-sdr25;
+	sd-uhs-sdr50;
+	sd-uhs-sdr104;
+	mmc-hs200-1_8v;
 	supports-sdio;
 	ignore-pm-notify;
 	keep-power-in-suspend;
 	non-removable;
+	cap-sdio-irq;
 	mmc-pwrseq = <&sdio_pwrseq>;
 	status = "okay";
 };
@@ -664,16 +807,16 @@
 	status = "okay";
 };
 
-/*change to uart0 debug*/
+&i2s1_2ch {
+	status = "okay";
+	#sound-dai-cells = <0>;
+};
+
 &uart0 {
-        pinctrl-names = "default";
-        pinctrl-0 = <&uart0_xfer /*&uart0_cts &uart0_rts*/>;
         status = "okay";
 };
 
 &uart1 {
-	pinctrl-names = "default";
-	pinctrl-0 = <&uart1_xfer /*&uart1_cts &uart1_rts*/>;
 	status = "okay";
 };
 
@@ -756,6 +899,11 @@
         };
     };
 
+  	eth_int {
+		eth_phy_int: eth_phy_int {
+                rockchip,pins = <2 RK_PB0 RK_FUNC_GPIO &pcfg_input>;
+        };
+  	};
 
 	i2c_pcal6416a_u32 {
 		pinctrl_pcal6416a_u32: pinctrl_pcal6416a_u32 {
@@ -769,6 +917,20 @@
 			rockchip,pins =
 //             <1 RK_PB0 RK_FUNC_GPIO &pcfg_output_low>, /* IO_EXPB_RST#  - GPIO_40 */
              <0 RK_PA3 RK_FUNC_GPIO &pcfg_pull_up>; /* IO_EXPB_INT#  - GPIO_3 */
+		};
+	};
+
+	i2s1 {
+		i2s1_2ch_bus: i2s1-2ch-bus {
+			rockchip,pins =
+				<2 RK_PC1 RK_FUNC_1 &pcfg_pull_none>,
+				<2 RK_PC2 RK_FUNC_1 &pcfg_pull_none>,
+				<2 RK_PC4 RK_FUNC_1 &pcfg_pull_none>,
+				<2 RK_PC5 RK_FUNC_1 &pcfg_pull_none>;
+		};
+
+		i2s_8ch_mclk: i2s-8ch-mclk {
+				rockchip,pins = <2 RK_PC3 RK_FUNC_1 &pcfg_pull_none>;
 		};
 	};
 
