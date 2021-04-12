@@ -16,7 +16,6 @@
 
 	panel {
 		compatible = "simple-panel";
-		backlight = <&backlight>;
 		enable-delay-ms = <120>;
 		prepare-delay-ms = <20>;
 		unprepare-delay-ms = <20>;
