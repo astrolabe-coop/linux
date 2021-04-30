@@ -16,7 +16,7 @@
 
 	backlight: backlight {
 		compatible = "pwm-backlight";
-		pwms = <&pwm1 0 25000 0>;
+		pwms = <&pwm1 0 100000 0>;
 		brightness-levels = <
 			  0   1   2   3   4   5   6   7
 			  8   9  10  11  12  13  14  15
@@ -50,7 +50,8 @@
 			232 233 234 235 236 237 238 239
 			240 241 242 243 244 245 246 247
 			248 249 250 251 252 253 254 255>;
-		default-brightness-level = <200>;
+		default-brightness-level = <250>;
+		enable-gpio = <&gpio_expanderB_u33 10 GPIO_ACTIVE_HIGH>;
 		/*enable-gpios=<&gpio0 15 GPIO_ACTIVE_HIGH>*/
 	};
 
@@ -58,6 +59,7 @@
 		compatible = "samsung,lsl070nl01", "simple-panel";
 		backlight = <&backlight>;
 		power-supply = <&vcc3v3_lcd>;
+		enable-gpios = <&gpio_expanderA_u32 12 GPIO_ACTIVE_HIGH>;
 		enable-delay-ms = <20>;
 		prepare-delay-ms = <20>;
 		unprepare-delay-ms = <20>;
