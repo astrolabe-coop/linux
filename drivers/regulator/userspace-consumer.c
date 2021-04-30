@@ -23,6 +23,7 @@
 #include <linux/regulator/consumer.h>
 #include <linux/regulator/userspace-consumer.h>
 #include <linux/slab.h>
+#include <linux/of.h>
 
 struct userspace_consumer_data {
 	const char *name;
@@ -105,6 +106,41 @@ static const struct attribute_group attr_group = {
 	.attrs	= attributes,
 };
 
+static struct regulator_userspace_consumer_data *get_pdata_from_dt_node(
+		struct platform_device *pdev)
+{
+	struct regulator_userspace_consumer_data *pdata;
+	struct device_node *np = pdev->dev.of_node;
+	struct property *prop;
+	const char *supply;
+	int num_supplies;
+	int count = 0;
+
+	pdata = devm_kzalloc(&pdev->dev, sizeof(*pdata), GFP_KERNEL);
+	if (!pdata)
+		return ERR_PTR(-ENOMEM);
+
+	pdata->name = of_get_property(np, "regulator-name", NULL);
+	pdata->init_on = of_property_read_bool(np, "regulator-boot-on");
+
+	num_supplies = of_property_count_strings(np, "regulator-supplies");
+	if (num_supplies < 0) {
+		dev_err(&pdev->dev,
+			"could not parse property regulator-supplies\n");
+		return ERR_PTR(-EINVAL);
+	}
+	pdata->num_supplies = num_supplies;
+	pdata->supplies = devm_kzalloc(&pdev->dev, num_supplies *
+				sizeof(*pdata->supplies), GFP_KERNEL);
+	if (!pdata->supplies)
+		return ERR_PTR(-ENOMEM);
+
+	of_property_for_each_string(np, "regulator-supplies", prop, supply)
+		pdata->supplies[count++].supply = supply;
+
+	return pdata;
+}
+
 static int regulator_userspace_consumer_probe(struct platform_device *pdev)
 {
 	struct regulator_userspace_consumer_data *pdata;
@@ -112,6 +148,11 @@ static int regulator_userspace_consumer_probe(struct platform_device *pdev)
 	int ret;
 
 	pdata = dev_get_platdata(&pdev->dev);
+	if (!pdata && pdev->dev.of_node) {
+		pdata = get_pdata_from_dt_node(pdev);
+		if (IS_ERR(pdata))
+			return PTR_ERR(pdata);
+	}
 	if (!pdata)
 		return -EINVAL;
 
@@ -171,15 +212,34 @@ static int regulator_userspace_consumer_remove(struct platform_device *pdev)
 	return 0;
 }
 
+static const struct of_device_id regulator_userspace_consumer_of_match[] = {
+	{ .compatible = "reg-userspace-consumer", },
+	{},
+};
+MODULE_DEVICE_TABLE(of, regulator_userspace_consumer_of_match);
+
 static struct platform_driver regulator_userspace_consumer_driver = {
 	.probe		= regulator_userspace_consumer_probe,
 	.remove		= regulator_userspace_consumer_remove,
 	.driver		= {
 		.name		= "reg-userspace-consumer",
+        .of_match_table = regulator_userspace_consumer_of_match,
 	},
 };
 
-module_platform_driver(regulator_userspace_consumer_driver);
+static int __init user_consumer_init(void)
+{
+	return platform_driver_register(&regulator_userspace_consumer_driver);
+}
+
+static void __exit user_consumer_exit(void)
+{
+	return platform_driver_unregister(&regulator_userspace_consumer_driver);
+}
+
+late_initcall_sync(user_consumer_init);
+module_exit(user_consumer_exit);
+// module_platform_driver(regulator_userspace_consumer_driver);
 
 MODULE_AUTHOR("Mike Rapoport <mike@compulab.co.il>");
 MODULE_DESCRIPTION("Userspace consumer for voltage and current regulators");
