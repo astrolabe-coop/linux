@@ -605,8 +605,6 @@
 			compatible = "rockchip,rk809-codec", "rockchip,rk817-codec";
 			clocks = <&cru SCLK_I2S1_OUT>;
 			clock-names = "mclk";
-			pinctrl-names = "default";
-			pinctrl-0 = <&i2s1_2ch_mclk>;
 			hp-volume = <20>;
 			spk-volume = <3>;
 			status = "okay";
@@ -879,19 +877,6 @@
 		};
 	};
 
-	i2s1 {
-		i2s1_2ch_bus: i2s1-2ch-bus {
-			rockchip,pins =
-				<2 RK_PC1 RK_FUNC_1 &pcfg_pull_none>,
-				<2 RK_PC2 RK_FUNC_1 &pcfg_pull_none>,
-				<2 RK_PC4 RK_FUNC_1 &pcfg_pull_none>,
-				<2 RK_PC5 RK_FUNC_1 &pcfg_pull_none>;
-		};
-
-		i2s_8ch_mclk: i2s-8ch-mclk {
-				rockchip,pins = <2 RK_PC3 RK_FUNC_1 &pcfg_pull_none>;
-		};
-	};
 
 	lcd_vdd_gpio {
         lcd_vdd_gpio_en: lcd_vdd_gpio_en {
