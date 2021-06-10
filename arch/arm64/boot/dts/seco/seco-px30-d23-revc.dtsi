@@ -858,7 +858,7 @@
 
   	eth_int {
 		eth_phy_int: eth_phy_int {
-                rockchip,pins = <2 RK_PB0 RK_FUNC_GPIO &pcfg_input>;
+                rockchip,pins = <2 RK_PB0 RK_FUNC_GPIO &pcfg_pull_none>;
         };
   	};
 
@@ -894,18 +894,18 @@
 		secod23_gpioset: secod23-gpioset {
 			rockchip,pins = 
                 <0 RK_PA0 RK_FUNC_GPIO &pcfg_output_high>, /* 1P8V_RUN_EN       - GPIO_0  */
-                <0 RK_PA1 RK_FUNC_GPIO &pcfg_input>,       /* M2_SDIO_WAKE#     - GPIO_1  */
+                <0 RK_PA1 RK_FUNC_GPIO &pcfg_output_high>,       /* M2_SDIO_WAKE#     - GPIO_1  */
 
-                <0 RK_PA2 RK_FUNC_GPIO &pcfg_input>,       /* EC_IRQ#           - GPIO_2   */
+                <0 RK_PA2 RK_FUNC_GPIO &pcfg_output_high>,       /* EC_IRQ#           - GPIO_2   */
 
-                <0 RK_PA5 RK_FUNC_GPIO &pcfg_input>,       /* TOUCH_INT#        - GPIO_5  */
+                <0 RK_PA5 RK_FUNC_GPIO &pcfg_output_high>,       /* TOUCH_INT#        - GPIO_5  */
 
                 <0 RK_PB7 RK_FUNC_GPIO &pcfg_output_high>, /* EC_RST#           - GPIO_15  */
 
-                <0 RK_PC1 RK_FUNC_GPIO &pcfg_input>,       /* M2_UART_WAKE#     - GPIO_17 */
+                <0 RK_PC1 RK_FUNC_GPIO &pcfg_output_high>,       /* M2_UART_WAKE#     - GPIO_17 */
 
                 <1 RK_PB0 RK_FUNC_GPIO &pcfg_output_high>, /* +3V3_MOD_EN       - GPIO_40 */
-                <1 RK_PB3 RK_FUNC_GPIO &pcfg_input>,       /* HDMI_INT#         - GPIO_43 */
+                <1 RK_PB3 RK_FUNC_GPIO &pcfg_output_high>,       /* HDMI_INT#         - GPIO_43 */
 
                 <0 RK_PC4 RK_FUNC_1    &pcfg_output_high>; /* CLKOUT_32K  */
 		};
