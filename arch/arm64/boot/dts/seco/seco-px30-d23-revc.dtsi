@@ -141,16 +141,16 @@
 		gpio = <&gpio_expanderA_u32 5 GPIO_ACTIVE_LOW>;
 	};
 
-	pcie_rst: pcie_rst {
-		compatible = "regulator-fixed";
-		regulator-boot-on;
-		regulator-always-on;
-		regulator-name = "pcie_rst";
-		regulator-min-microvolt = <3000000>;
-		regulator-max-microvolt = <3000000>;
-		gpio = <&gpio_expanderA_u32 13 GPIO_ACTIVE_LOW>;
-	};
-
+//	pcie_rst: pcie_rst {
+//		compatible = "regulator-fixed";
+//		regulator-boot-on;
+//		regulator-always-on;
+//		regulator-name = "pcie_rst";
+//		regulator-min-microvolt = <3000000>;
+//		regulator-max-microvolt = <3000000>;
+//		gpio = <&gpio_expanderA_u32 13 GPIO_ACTIVE_LOW>;
+//	};
+//
     vdd_m2_enabler: en_vdd-m2 {
         compatible = "reg-userspace-consumer";
         regulator-name = "en_vdd-m2";
