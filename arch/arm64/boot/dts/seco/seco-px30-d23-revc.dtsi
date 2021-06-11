@@ -148,7 +148,7 @@
 		regulator-name = "pcie_rst";
 		regulator-min-microvolt = <3000000>;
 		regulator-max-microvolt = <3000000>;
-		gpio = <&gpio_expanderA_u32 13 GPIO_ACTIVE_HIGH>;
+		gpio = <&gpio_expanderA_u32 13 GPIO_ACTIVE_LOW>;
 	};
 
     vdd_m2_enabler: en_vdd-m2 {
