@@ -979,7 +979,7 @@ EXPORT_SYMBOL_GPL(usbnet_set_settings);
 struct rtnl_link_stats64 *
 usbnet_get_stats64(struct net_device *net, struct rtnl_link_stats64 *stats)
 {
-#ifdef DUMMY_STATS_TO_AVOID_CRASH
+#ifdef CONFIG_DUMMY_STATS_TO_AVOID_CRASH
 	stats->rx_packets = 0;
 	stats->rx_bytes = 0;
 	stats->tx_packets = 0;
@@ -1011,7 +1011,7 @@ usbnet_get_stats64(struct net_device *net, struct rtnl_link_stats64 *stats)
 		stats->tx_packets += tx_packets;
 		stats->tx_bytes += tx_bytes;
 	}
-#endif /* DUMMY_STATS_TO_AVOID_CRASH */
+#endif /* CONFIG_DUMMY_STATS_TO_AVOID_CRASH */
 	return stats;
 }
 EXPORT_SYMBOL_GPL(usbnet_get_stats64);

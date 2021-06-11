@@ -152,6 +152,14 @@ config USB_USBNET
 	  To compile this driver as a module, choose M here: the
 	  module will be called usbnet.
 
+config DUMMY_STATS_TO_AVOID_CRASH
+	tristate "Use dummy stats to avpoid crash with buggy LTE modems"
+	depends on USB_USBNET
+	default n
+	help
+	  This option enable dummy stats insthad of native one to avoid
+	  crash when the function get_stats is called
+
 config USB_NET_AX8817X
 	tristate "ASIX AX88xxx Based USB 2.0 Ethernet Adapters"
 	depends on USB_USBNET
