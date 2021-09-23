@@ -76,9 +76,11 @@ struct at24_data {
 	struct nvmem_device *nvmem;
 	struct nvmem_device *mac_nvmem;
 	struct nvmem_device *serial_nvmem;
+	struct nvmem_device *pn_nvmem;
 
 	struct nvmem_config mac_nvmem_config;
 	struct nvmem_config serial_nvmem_config;
+	struct nvmem_config pn_nvmem_config;
 	struct nvmem_config user_nvmem_config;
 	/*
 	 * Some chips tie up multiple I2C addresses; dummy devices reserve
@@ -112,6 +114,8 @@ MODULE_PARM_DESC(write_timeout, "Time (in ms) to try writes (default 25)");
 #define SECO_MAC_CHAR_LEN 12
 #define SECO_SERIAL_OFFSET 6
 #define SECO_SERIAL_CHAR_LEN 9
+#define SECO_PN_OFFSET 16
+#define SECO_PN_CHAR_LEN 13
 #define SECO_RESERVED_BYTE 32
 
 #define AT24_SIZE_BYTELEN 5
@@ -601,6 +605,37 @@ static ssize_t at24_eeprom_write_i2c(struct at24_data *at24, const char *buf,
 	return -ETIMEDOUT;
 }
 
+static int at24_pn_read(void *priv, unsigned int off, void *val, size_t count)
+{
+	struct at24_data *at24 = priv;
+	char *buf = val;
+
+	off = 0;
+
+	/*
+	 * Read data from chip, protecting against concurrent updates
+	 * from this host, but not from other I2C masters.
+	 */
+	mutex_lock(&at24->lock);
+
+	while (count) {
+		int	status;
+
+		status = at24->read_func(at24, buf, SECO_PN_OFFSET, SECO_PN_CHAR_LEN);
+		if (status < 0) {
+			mutex_unlock(&at24->lock);
+			return status;
+		}
+		buf += status;
+		off += status;
+		count -= status;
+	}
+
+	mutex_unlock(&at24->lock);
+
+	return 0;
+}
+
 static int at24_serial_read(void *priv, unsigned int off, void *val, size_t count)
 {
 	struct at24_data *at24 = priv;
@@ -617,7 +652,7 @@ static int at24_serial_read(void *priv, unsigned int off, void *val, size_t coun
 	while (count) {
 		int	status;
 
-		status = at24->read_func(at24, buf, 6, 9);
+		status = at24->read_func(at24, buf, SECO_SERIAL_OFFSET, SECO_SERIAL_CHAR_LEN);
 		if (status < 0) {
 			mutex_unlock(&at24->lock);
 			return status;
@@ -705,6 +740,34 @@ static int at24_read(void *priv, unsigned int off, void *val, size_t count)
 		count -= status;
 	}
 
+	mutex_unlock(&at24->lock);
+
+	return 0;
+}
+
+static int at24_pn_write(void *priv, unsigned int off, void *val, size_t count)
+{
+	struct at24_data *at24 = priv;
+	char *buf = val;
+    int status;
+
+	if (count != (SECO_PN_CHAR_LEN))
+		return -EINVAL;
+
+	if (buf[SECO_PN_CHAR_LEN] != '\0')
+		return -EINVAL;
+
+	/*
+	 * Write data to chip, protecting against concurrent updates
+	 * from this host, but not from other I2C masters.
+	 */
+	mutex_lock(&at24->lock);
+
+	status = at24->write_func(at24, buf, SECO_PN_OFFSET, SECO_PN_CHAR_LEN);
+	if (status < 0) {
+		mutex_unlock(&at24->lock);
+		return status;
+	}
 	mutex_unlock(&at24->lock);
 
 	return 0;
@@ -1033,14 +1096,13 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
         at24->serial_nvmem_config.word_size = 1;
         at24->serial_nvmem_config.size = SECO_SERIAL_CHAR_LEN;
 
-
 	    at24->serial_nvmem = nvmem_register(&at24->serial_nvmem_config);
 
-
-        if (IS_ERR(at24->nvmem)) {
-            err = PTR_ERR(at24->nvmem);
+        if (IS_ERR(at24->serial_nvmem)) {
+            err = PTR_ERR(at24->serial_nvmem);
             goto err_clients;
         }
+
 
         at24->mac_nvmem_config.name = "mac_seco";
         at24->mac_nvmem_config.dev = &client->dev;
@@ -1056,12 +1118,32 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
         at24->mac_nvmem_config.word_size = 1;
         at24->mac_nvmem_config.size = SECO_MAC_CHAR_LEN;
 
-
 	    at24->mac_nvmem = nvmem_register(&at24->mac_nvmem_config);
-
 
         if (IS_ERR(at24->mac_nvmem)) {
             err = PTR_ERR(at24->mac_nvmem);
+            goto err_clients;
+        }
+
+
+        at24->pn_nvmem_config.name = "pn_seco";
+        at24->pn_nvmem_config.dev = &client->dev;
+        at24->pn_nvmem_config.read_only = false;
+        at24->pn_nvmem_config.root_only = true;
+        at24->pn_nvmem_config.owner = THIS_MODULE;
+        at24->pn_nvmem_config.compat = false;
+        at24->pn_nvmem_config.base_dev = &client->dev;
+        at24->pn_nvmem_config.reg_read = at24_pn_read;
+        at24->pn_nvmem_config.reg_write = at24_pn_write;
+        at24->pn_nvmem_config.priv = at24;
+        at24->pn_nvmem_config.stride = 1;
+        at24->pn_nvmem_config.word_size = 1;
+        at24->pn_nvmem_config.size = SECO_PN_CHAR_LEN;
+
+	    at24->pn_nvmem = nvmem_register(&at24->pn_nvmem_config);
+
+        if (IS_ERR(at24->pn_nvmem)) {
+            err = PTR_ERR(at24->pn_nvmem);
             goto err_clients;
         }
     } else {
