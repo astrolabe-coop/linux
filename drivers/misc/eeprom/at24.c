@@ -115,7 +115,7 @@ MODULE_PARM_DESC(write_timeout, "Time (in ms) to try writes (default 25)");
 #define SECO_SERIAL_OFFSET 6
 #define SECO_SERIAL_CHAR_LEN 9
 #define SECO_PN_OFFSET 16
-#define SECO_PN_CHAR_LEN 13
+#define SECO_PN_CHAR_LEN 16
 #define SECO_RESERVED_BYTE 32
 
 #define AT24_SIZE_BYTELEN 5
