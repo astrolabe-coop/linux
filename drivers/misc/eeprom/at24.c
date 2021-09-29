@@ -114,7 +114,8 @@ MODULE_PARM_DESC(write_timeout, "Time (in ms) to try writes (default 25)");
 #define SECO_MAC_CHAR_LEN 12
 #define SECO_SERIAL_OFFSET 6
 #define SECO_SERIAL_CHAR_LEN 9
-#define SECO_PN_OFFSET 16
+#define SECO_PN_OFFSETa 15
+#define SECO_PN_OFFSETb 16
 #define SECO_PN_CHAR_LEN 17
 #define SECO_RESERVED_BYTE 32
 
@@ -621,7 +622,7 @@ static int at24_pn_read(void *priv, unsigned int off, void *val, size_t count)
 	while (count) {
 		int	status;
 
-		status = at24->read_func(at24, buf, SECO_PN_OFFSET, SECO_PN_CHAR_LEN);
+		status = at24->read_func(at24, buf, SECO_PN_OFFSETa, SECO_PN_CHAR_LEN);
 		if (status < 0) {
 			mutex_unlock(&at24->lock);
 			return status;
@@ -763,7 +764,12 @@ static int at24_pn_write(void *priv, unsigned int off, void *val, size_t count)
 	 */
 	mutex_lock(&at24->lock);
 
-	status = at24->write_func(at24, buf, SECO_PN_OFFSET, SECO_PN_CHAR_LEN);
+	status = at24->write_func(at24, buf, SECO_PN_OFFSETa, 1);
+	if (status < 0) {
+		mutex_unlock(&at24->lock);
+		return status;
+	}
+	status = at24->write_func(at24, buf+1, SECO_PN_OFFSETb, SECO_PN_CHAR_LEN-1);
 	if (status < 0) {
 		mutex_unlock(&at24->lock);
 		return status;
