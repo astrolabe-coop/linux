@@ -843,6 +843,7 @@
 &i2s1_2ch {
 	status = "okay";
 	#sound-dai-cells = <0>;
+	gpio-amp-sd = <&gpio_expanderB_u33 14 GPIO_ACTIVE_HIGH>;
 };
 
 &uart0 {

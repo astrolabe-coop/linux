@@ -46,6 +46,8 @@ struct rk_i2s_dev {
 	struct reset_control *reset_m;
 	struct reset_control *reset_h;
 
+	struct gpio_desc	*amp_shutdown_gpio;
+
 /*
  * Used to indicate the tx/rx status.
  * I2S controller hopes to start the tx and rx together,
@@ -161,6 +163,14 @@ static void rockchip_snd_txctrl(struct rk_i2s_dev *i2s, int on)
 		}
 	}
 	spin_unlock(&lock);
+
+	if (on) {
+		gpiod_set_value_cansleep(i2s->amp_shutdown_gpio, 1);
+		printk("--> i2s->tx_start = true;\n");
+	} else {
+		gpiod_set_value_cansleep(i2s->amp_shutdown_gpio, 0);
+		printk("--> i2s->tx_start = false;\n");
+	}
 }
 
 static void rockchip_snd_rxctrl(struct rk_i2s_dev *i2s, int on)
@@ -618,6 +628,7 @@ static int rockchip_i2s_probe(struct platform_device *pdev)
 	struct snd_soc_dai_driver *soc_dai;
 	struct resource *res;
 	void __iomem *regs;
+	int amp_shutdown;
 	int ret;
 	int val;
 
@@ -723,6 +734,22 @@ static int rockchip_i2s_probe(struct platform_device *pdev)
 			if (i2s->clk_trcm)
 				soc_dai->symmetric_rates = 1;
 		}
+	}
+
+	amp_shutdown = of_get_named_gpio(node, "gpio-amp-sd", 0);
+	if (!gpio_is_valid(amp_shutdown)) {
+	    printk("Warn! not using aplifier gpio shutdown\n");
+	} else {
+	    i2s->amp_shutdown_gpio = gpio_to_desc(amp_shutdown);
+		ret = devm_gpio_request_one(&pdev->dev, amp_shutdown,
+					    GPIOF_OUT_INIT_LOW, "amp_shutdown");
+		if (ret) {
+			dev_err(&pdev->dev, "cannot get amp_shutdown gpio\n");
+			return ret;
+		}
+        gpiod_direction_output(i2s->amp_shutdown_gpio, 0);
+
+	    printk("Using aplifier gpio shutdown GPIO = %d\n", amp_shutdown);
 	}
 
 	regmap_update_bits(i2s->regmap, I2S_CKR,
