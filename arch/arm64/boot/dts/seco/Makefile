@@ -4,6 +4,7 @@ endif
 
 dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-rk3399-c31.dtb
 dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revc.dtb
+dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revc1.dtb
 
 # dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revc-hdmi.dtb
 # dtb-$(CONFIG_ARCH_ROCKCHIP) += seco-px30-d23-revc-lvds-800x480.dtb
