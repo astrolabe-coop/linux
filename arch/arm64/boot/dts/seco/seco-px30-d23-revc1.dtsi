@@ -695,10 +695,10 @@
         reg = <0x51>;
     };
 
-	at24@52 {
+	at24@53 {
 		compatible = "at24,24aa025";
 		pagesize   = <256>;
-		reg        = <0x52>;
+		reg        = <0x53>;
 	};
 
 	gpio_expanderA_u32: pcal6416@20 {
@@ -824,7 +824,6 @@
 	sd-uhs-sdr50;
 	sd-uhs-sdr104;
 	mmc-hs200-1_8v;
-    max-frequency=<25000000>;
 	supports-sdio;
 	ignore-pm-notify;
 	keep-power-in-suspend;
