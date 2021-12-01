@@ -113,7 +113,7 @@ MODULE_PARM_DESC(write_timeout, "Time (in ms) to try writes (default 25)");
 #define SECO_MAC_OFFSET 0
 #define SECO_MAC_CHAR_LEN 12
 #define SECO_SERIAL_OFFSET 6
-#define SECO_SERIAL_CHAR_LEN 9
+#define SECO_SERIAL_MAX_CHAR_LEN 9
 #define SECO_PN_OFFSETa 15
 #define SECO_PN_OFFSETb 16
 #define SECO_PN_CHAR_LEN 17
@@ -653,7 +653,7 @@ static int at24_serial_read(void *priv, unsigned int off, void *val, size_t coun
 	while (count) {
 		int	status;
 
-		status = at24->read_func(at24, buf, SECO_SERIAL_OFFSET, SECO_SERIAL_CHAR_LEN);
+		status = at24->read_func(at24, buf, SECO_SERIAL_OFFSET, SECO_SERIAL_MAX_CHAR_LEN);
 		if (status < 0) {
 			mutex_unlock(&at24->lock);
 			return status;
@@ -664,6 +664,9 @@ static int at24_serial_read(void *priv, unsigned int off, void *val, size_t coun
 	}
 
 	mutex_unlock(&at24->lock);
+
+    if (buf[SECO_SERIAL_MAX_CHAR_LEN - 1] == 'X')
+      buf[SECO_SERIAL_MAX_CHAR_LEN - 1] = '\0';
 
 	return 0;
 }
@@ -785,13 +788,19 @@ static int at24_serial_write(void *priv, unsigned int off, void *val, size_t cou
 	char *buf = val;
     int status;
 
-	if (count != (SECO_SERIAL_CHAR_LEN))
+	if (count > (SECO_SERIAL_MAX_CHAR_LEN) || count < (SECO_SERIAL_MAX_CHAR_LEN - 1))
 		return -EINVAL;
 
-	if (buf[SECO_SERIAL_CHAR_LEN] != '\0')
-		return -EINVAL;
+	if (buf[SECO_SERIAL_MAX_CHAR_LEN - 1] == '\0') {
+		buf[SECO_SERIAL_MAX_CHAR_LEN - 1] = 'X';
+		buf[SECO_SERIAL_MAX_CHAR_LEN] = '\0';
+	}
 
-	if ((buf[0] != 'k') && (buf[0] != 'K'))
+    if (buf[SECO_SERIAL_MAX_CHAR_LEN] != '\0') {
+		return -EINVAL;
+    }
+
+	if (!isalpha(buf[0]))
 		return -EINVAL;
 
 	/*
@@ -800,7 +809,7 @@ static int at24_serial_write(void *priv, unsigned int off, void *val, size_t cou
 	 */
 	mutex_lock(&at24->lock);
 
-	status = at24->write_func(at24, buf, SECO_SERIAL_OFFSET, SECO_SERIAL_CHAR_LEN);
+	status = at24->write_func(at24, buf, SECO_SERIAL_OFFSET, SECO_SERIAL_MAX_CHAR_LEN);
 	if (status < 0) {
 		mutex_unlock(&at24->lock);
 		return status;
@@ -1100,7 +1109,7 @@ static int at24_probe(struct i2c_client *client, const struct i2c_device_id *id)
         at24->serial_nvmem_config.priv = at24;
         at24->serial_nvmem_config.stride = 1;
         at24->serial_nvmem_config.word_size = 1;
-        at24->serial_nvmem_config.size = SECO_SERIAL_CHAR_LEN;
+        at24->serial_nvmem_config.size = SECO_SERIAL_MAX_CHAR_LEN;
 
 	    at24->serial_nvmem = nvmem_register(&at24->serial_nvmem_config);
 
